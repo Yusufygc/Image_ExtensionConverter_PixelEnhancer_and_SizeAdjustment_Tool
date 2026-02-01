@@ -7,13 +7,13 @@ from utils.image_loader import load_image
 class ResizerService(IResizer):
     def process(self, image_path: str, **kwargs) -> str:
         if 'width' in kwargs and 'height' in kwargs:
-            return self.resize_by_dimensions(image_path, kwargs['width'], kwargs['height'])
+            return self.resize_by_dimensions(image_path, kwargs['width'], kwargs['height'], kwargs.get('output_dir'))
         elif 'percentage' in kwargs:
-            return self.resize_by_percentage(image_path, kwargs['percentage'])
+            return self.resize_by_percentage(image_path, kwargs['percentage'], kwargs.get('output_dir'))
         else:
             raise ValueError("Invalid arguments for resizing")
 
-    def resize_by_dimensions(self, image_path: str, width: int, height: int) -> str:
+    def resize_by_dimensions(self, image_path: str, width: int, height: int, output_dir: str = None) -> str:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"File not found: {image_path}")
 
@@ -22,7 +22,10 @@ class ResizerService(IResizer):
                 # Use High Quality Resampling
                 resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
                 
-                directory = os.path.dirname(image_path)
+                directory = output_dir if output_dir else os.path.dirname(image_path)
+                if output_dir and not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
                 filename = os.path.splitext(os.path.basename(image_path))[0]
                 output_path = os.path.join(directory, f"{filename}_resized_{width}x{height}.{img.format.lower() if img.format else 'png'}")
                 
@@ -31,7 +34,7 @@ class ResizerService(IResizer):
         except Exception as e:
             raise Exception(f"Resizing failed: {str(e)}")
 
-    def resize_by_percentage(self, image_path: str, percentage: int) -> str:
+    def resize_by_percentage(self, image_path: str, percentage: int, output_dir: str = None) -> str:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"File not found: {image_path}")
             
@@ -41,6 +44,6 @@ class ResizerService(IResizer):
                 new_width = int(width * (percentage / 100))
                 new_height = int(height * (percentage / 100))
                 
-                return self.resize_by_dimensions(image_path, new_width, new_height)
+                return self.resize_by_dimensions(image_path, new_width, new_height, output_dir)
         except Exception as e:
              raise Exception(f"Resizing failed: {str(e)}")

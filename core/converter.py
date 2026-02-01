@@ -8,9 +8,9 @@ from utils.image_loader import load_image
 class ConverterService(IConverter):
     def process(self, image_path: str, **kwargs) -> str:
         output_format = kwargs.get('output_format')
-        return self.convert(image_path, output_format)
+        return self.convert(image_path, output_format, output_dir=kwargs.get('output_dir'))
 
-    def convert(self, image_path: str, output_format: str, output_path: str = None) -> str:
+    def convert(self, image_path: str, output_format: str, output_path: str = None, output_dir: str = None) -> str:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"File not found: {image_path}")
 
@@ -22,7 +22,10 @@ class ConverterService(IConverter):
                 
                 if output_path is None:
                     # Generate default output path
-                    directory = os.path.dirname(image_path)
+                    directory = output_dir if output_dir else os.path.dirname(image_path)
+                    if output_dir and not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                        
                     filename = os.path.splitext(os.path.basename(image_path))[0]
                     output_path = os.path.join(directory, f"{filename}_converted.{output_format.lower()}")
 

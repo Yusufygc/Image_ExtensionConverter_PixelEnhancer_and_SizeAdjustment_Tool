@@ -8,9 +8,9 @@ import os
 class EnhancerService(IEnhancer):
     def process(self, image_path: str, **kwargs) -> str:
         factor = kwargs.get('factor', 2.0)
-        return self.enhance_resolution(image_path, factor)
+        return self.enhance_resolution(image_path, factor, kwargs.get('output_dir'))
 
-    def enhance_resolution(self, image_path: str, factor: float) -> str:
+    def enhance_resolution(self, image_path: str, factor: float, output_dir: str = None) -> str:
         try:
             with load_image(image_path) as img:
                 width, height = img.size
@@ -30,7 +30,10 @@ class EnhancerService(IEnhancer):
                 enhancer = ImageEnhance.Contrast(enhanced_img)
                 enhanced_img = enhancer.enhance(1.1)
                 
-                directory = os.path.dirname(image_path)
+                directory = output_dir if output_dir else os.path.dirname(image_path)
+                if output_dir and not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
                 filename = os.path.splitext(os.path.basename(image_path))[0]
                 output_path = os.path.join(directory, f"{filename}_enhanced_x{factor}.{img.format.lower() if img.format else 'png'}")
                 
