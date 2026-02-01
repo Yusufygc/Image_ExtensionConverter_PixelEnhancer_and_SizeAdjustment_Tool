@@ -1,8 +1,9 @@
 import os
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                                QPushButton, QLabel, QFileDialog, QComboBox, 
-                               QSpinBox, QDoubleSpinBox, QProgressBar, QMessageBox, QGroupBox, QListWidget, QStackedWidget)
+                               QSpinBox, QDoubleSpinBox, QProgressBar, QMessageBox, QGroupBox, QListWidget, QStackedWidget, QListWidgetItem)
 from PySide6.QtCore import Qt, Slot, QSize
+from PySide6.QtGui import QIcon
 
 from ui.widgets.drop_zone import DropZone
 from ui.styles.theme import ThemeManager
@@ -12,7 +13,13 @@ from core.converter import ConverterService
 from core.resizer import ResizerService
 from core.enhancer import EnhancerService
 from utils.constants import AppConstants, Styles
+from core.converter import ConverterService
+from core.resizer import ResizerService
+from core.enhancer import EnhancerService
+from ui.widgets.file_list_item import FileListItemWidget
+from utils.constants import AppConstants, Styles
 from utils.path_helper import get_resource_path
+dir_output_default = os.path.join(os.path.expanduser("~"), "Desktop", "Conventor_Output")
 
 class MainWindow(QMainWindow):
     def __init__(self, app):
@@ -34,7 +41,14 @@ class MainWindow(QMainWindow):
         self.enhancer_service = EnhancerService()
         self.current_worker = None
         
-        self.selected_files = []
+        self.converter_service = ConverterService()
+        self.resizer_service = ResizerService()
+        self.enhancer_service = EnhancerService()
+        self.current_worker = None
+        
+        self.selected_files = [] # List of paths
+        self.output_dir = None
+
 
         self.setup_ui()
         ThemeManager.apply_theme(self.app_instance)
@@ -51,7 +65,7 @@ class MainWindow(QMainWindow):
         
         # Dummy spacer to balance the right button (for perfect centering)
         dummy_btn = QWidget()
-        dummy_btn.setFixedWidth(80) # Same width as the button
+        dummy_btn.setFixedSize(40, 40)
         header_layout.addWidget(dummy_btn)
         
         header_layout.addStretch() # Spacer Left
@@ -63,10 +77,21 @@ class MainWindow(QMainWindow):
         
         header_layout.addStretch() # Spacer Right
         
+        
         # Info Button
-        self.btn_info = QPushButton("Bilgi")
-        self.btn_info.setFixedWidth(80)
+        self.btn_info = QPushButton()
+        self.btn_info.setFixedSize(40, 40)
+        self.btn_info.setObjectName("IconOnlyButton")
+        self.btn_info.setCursor(Qt.PointingHandCursor)
         self.btn_info.clicked.connect(self.toggle_info_page)
+        
+        info_icon_path = get_resource_path("assets/icons/info_icon.svg")
+        if os.path.exists(info_icon_path):
+            self.btn_info.setIcon(QIcon(info_icon_path))
+            self.btn_info.setIconSize(QSize(24, 24))
+        else:
+            self.btn_info.setText("?")
+            
         header_layout.addWidget(self.btn_info)
         
         main_layout.addLayout(header_layout)
@@ -107,20 +132,46 @@ class MainWindow(QMainWindow):
         self.btn_browse = QPushButton("Dosya Seç")
         self.btn_browse.clicked.connect(self.browse_files)
         
+        
+        # File List Styling
         self.file_list = QListWidget()
-        self.file_list.setMaximumHeight(150)
-        self.file_list.setAlternatingRowColors(True)
+        self.file_list.setSelectionMode(QListWidget.NoSelection) # Disable selection as we have buttons
+        self.file_list.setStyleSheet("""
+            QListWidget {
+                background-color: #1e1e2e;
+                border: 1px solid #313244;
+                border-radius: 8px;
+                padding: 5px;
+            }
+            QListWidget::item {
+                border-bottom: 1px solid #313244;
+                padding: 5px;
+            }
+            QListWidget::item:last {
+                border-bottom: none;
+            }
+        """)
+
+        left_side_layout.addWidget(self.drop_zone)
+        left_side_layout.addSpacing(10)
+        left_side_layout.addWidget(self.btn_browse)
+        left_side_layout.addSpacing(15)
+        
+        lbl_files = QLabel("Seçilen Dosyalar:")
+        lbl_files.setStyleSheet("font-weight: bold; color: #cdd6f4;")
+        left_side_layout.addWidget(lbl_files)
+        
+        left_side_layout.addWidget(self.file_list)
+        left_side_layout.addSpacing(10)
         
         self.btn_clear = QPushButton("Seçilen dosyaları temizle")
         self.btn_clear.setObjectName("DangerButton")
-        self.btn_clear.setMinimumHeight(45)
+        self.btn_clear.setMinimumHeight(40)
+        self.btn_clear.setCursor(Qt.PointingHandCursor)
         self.btn_clear.clicked.connect(self.clear_files)
-
-        left_side_layout.addWidget(self.drop_zone)
-        left_side_layout.addWidget(self.btn_browse)
-        left_side_layout.addWidget(QLabel("Seçilen Dosyalar:"))
-        left_side_layout.addWidget(self.file_list)
+        
         left_side_layout.addWidget(self.btn_clear)
+        
         left_side_group.setLayout(left_side_layout)
         
         content_layout.addWidget(left_side_group, stretch=1)
@@ -203,6 +254,39 @@ class MainWindow(QMainWindow):
         
         op_layout.addWidget(self.options_container)
         
+        # Output Folder Selection
+        from PySide6.QtWidgets import QLineEdit
+        
+        self.widget_output = QWidget()
+        wo_layout = QVBoxLayout(self.widget_output)
+        wo_layout.setContentsMargins(0, 10, 0, 0)
+        
+        wo_layout.addWidget(QLabel("Hedef Klasör:"))
+        
+        path_layout = QHBoxLayout()
+        self.line_output = QLineEdit()
+        self.line_output.setPlaceholderText("Varsayılan (Kaynak Klasör)")
+        self.line_output.setReadOnly(True)
+        self.line_output.setStyleSheet("padding: 8px; border-radius: 4px; background: #313244; color: #cdd6f4;")
+        
+        self.btn_output_select = QPushButton()
+        self.btn_output_select.setFixedSize(36, 36)
+        self.btn_output_select.setCursor(Qt.PointingHandCursor)
+        self.btn_output_select.clicked.connect(self.select_output_folder)
+        
+        folder_icon_path = get_resource_path("assets/icons/folder_icon.svg")
+        if os.path.exists(folder_icon_path):
+             self.btn_output_select.setIcon(QIcon(folder_icon_path))
+        else:
+             self.btn_output_select.setText("📂")
+             
+        path_layout.addWidget(self.line_output)
+        path_layout.addWidget(self.btn_output_select)
+        wo_layout.addLayout(path_layout)
+        
+        op_layout.addWidget(self.widget_output)
+        op_layout.addSpacing(20)
+
         self.btn_process = QPushButton("İŞLEMİ BAŞLAT")
         self.btn_process.setObjectName("PrimaryButton")
         self.btn_process.setMinimumHeight(50)
@@ -225,30 +309,74 @@ class MainWindow(QMainWindow):
         self.app_instance = app
         ThemeManager.apply_theme(app)
 
+        # Connect DropZone click
+        self.drop_zone.clicked.connect(self.browse_files)
+        
     @Slot()
     def toggle_info_page(self):
         if self.stack.currentIndex() == 0:
             self.stack.setCurrentIndex(1)
-            self.btn_info.setText("Geri")
+            # Switch to Back Arrow
+            back_icon_path = get_resource_path("assets/icons/back_arrow.svg")
+            if os.path.exists(back_icon_path):
+                self.btn_info.setIcon(QIcon(back_icon_path))
+            else:
+                self.btn_info.setText("<-")
         else:
             self.stack.setCurrentIndex(0)
-            self.btn_info.setText("Bilgi")
+            # Switch back to Info Icon
+            info_icon_path = get_resource_path("assets/icons/info_icon.svg")
+            if os.path.exists(info_icon_path):
+                self.btn_info.setIcon(QIcon(info_icon_path))
+            else:
+                self.btn_info.setText("?")
 
     @Slot()
     def browse_files(self):
         files, _ = QFileDialog.getOpenFileNames(self, "Resim Seç", "", "Resim Dosyaları (*.png *.jpg *.jpeg *.bmp *.webp *.ico *.tiff *.svg)")
         if files:
             self.add_files(files)
+            
+    @Slot()
+    def select_output_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Hedef Klasör Seç")
+        if folder:
+            self.output_dir = folder
+            self.line_output.setText(folder)
 
     def add_files(self, file_paths):
         for path in file_paths:
             if path not in self.selected_files:
                 self.selected_files.append(path)
-                self.file_list.addItem(os.path.basename(path))
+                
+                # Add Item to List Widget using Custom Widget
+                item = QListWidgetItem(self.file_list)
+                item.setSizeHint(QSize(0, 60)) # Set height for the item
+                
+                item_widget = FileListItemWidget(path)
+                item_widget.remove_clicked.connect(self.remove_file)
+                
+                self.file_list.setItemWidget(item, item_widget)
+                
+    def remove_file(self, file_path):
+        if file_path in self.selected_files:
+            self.selected_files.remove(file_path)
+            
+            # Find and remove from list widget
+            # Efficient way: iterate and find match (since we don't have direct mapping)
+            for i in range(self.file_list.count()):
+                item = self.file_list.item(i)
+                widget = self.file_list.itemWidget(item)
+                if widget and widget.file_path == file_path:
+                    self.file_list.takeItem(i)
+                    break
 
+
+                
     def clear_files(self):
         self.selected_files.clear()
         self.file_list.clear()
+
 
     @Slot(int)
     def update_options_ui(self, index):
@@ -284,6 +412,10 @@ class MainWindow(QMainWindow):
         elif operation_idx == 2: # Enhance
             service = self.enhancer_service
             kwargs['factor'] = self.spin_factor.value()
+
+        # Add output dir
+        if self.output_dir:
+            kwargs['output_dir'] = self.output_dir
 
         self.btn_process.setEnabled(False)
         self.current_worker = ProcessingWorker(service, self.selected_files, **kwargs)
