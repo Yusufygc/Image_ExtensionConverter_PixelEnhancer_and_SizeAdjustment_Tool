@@ -6,7 +6,7 @@ class AppConstants:
     
     # Desteklenen Formatlar
     SUPPORTED_FORMATS = [
-        "JPEG", "PNG", "WEBP", "BMP", "ICO", "TIFF"
+        "JPEG", "PNG", "WEBP", "BMP", "ICO", "TIFF", "SVG"
     ]
     
     # Varsayılan değerler
