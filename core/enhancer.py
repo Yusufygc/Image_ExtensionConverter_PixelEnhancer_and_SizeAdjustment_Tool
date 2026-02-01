@@ -2,6 +2,8 @@ import os
 from PIL import Image, ImageFilter, ImageEnhance
 from core.interfaces import IEnhancer
 from utils.constants import AppConstants
+from utils.image_loader import load_image
+import os
 
 class EnhancerService(IEnhancer):
     def process(self, image_path: str, **kwargs) -> str:
@@ -9,11 +11,8 @@ class EnhancerService(IEnhancer):
         return self.enhance_resolution(image_path, factor)
 
     def enhance_resolution(self, image_path: str, factor: float) -> str:
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"File not found: {image_path}")
-
         try:
-            with Image.open(image_path) as img:
+            with load_image(image_path) as img:
                 width, height = img.size
                 new_width = int(width * factor)
                 new_height = int(height * factor)

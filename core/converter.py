@@ -1,7 +1,9 @@
 import os
+import io
 from PIL import Image
 from core.interfaces import IConverter
 from utils.constants import AppConstants
+from utils.image_loader import load_image
 
 class ConverterService(IConverter):
     def process(self, image_path: str, **kwargs) -> str:
@@ -13,7 +15,7 @@ class ConverterService(IConverter):
             raise FileNotFoundError(f"File not found: {image_path}")
 
         try:
-            with Image.open(image_path) as img:
+            with load_image(image_path) as img:
                 # Convert mode logic (e.g. RGBA to RGB for JPEG)
                 if output_format.upper() in ["JPEG", "JPG", "BMP"] and img.mode == "RGBA":
                     img = img.convert("RGB")
@@ -27,11 +29,29 @@ class ConverterService(IConverter):
                 # ICO specific handling
                 if output_format.upper() == "ICO":
                     # ICO usually needs specific sizes
-                    img.save(output_path, format=output_format.upper(), sizes=[(256, 256)])
+                    img.save(output_path, format=output_format.upper(), sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
+                elif output_format.upper() == "SVG":
+                    # Raster to SVG (Embedding strategy)
+                    import base64
+                    
+                    # Ensure we have the image in a buffer (PNG is good for web/svg)
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="PNG")
+                    img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                    
+                    width, height = img.size
+                    
+                    svg_content = f'''<svg width="{width}" height="{height}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <image width="{width}" height="{height}" xlink:href="data:image/png;base64,{img_str}" />
+</svg>'''
+                    
+                    with open(output_path, "w", encoding="utf-8") as f:
+                        f.write(svg_content)
                 else:
                     img.save(output_path, format=output_format.upper(), quality=AppConstants.DEFAULT_QUALITY)
                 
                 return output_path
+
         except Exception as e:
             # Clean up logic could go here if partial file created
             raise Exception(f"Conversion failed: {str(e)}")

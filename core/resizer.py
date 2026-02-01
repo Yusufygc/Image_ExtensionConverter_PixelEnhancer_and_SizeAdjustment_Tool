@@ -2,6 +2,7 @@ import os
 from PIL import Image
 from core.interfaces import IResizer
 from utils.constants import AppConstants
+from utils.image_loader import load_image
 
 class ResizerService(IResizer):
     def process(self, image_path: str, **kwargs) -> str:
@@ -17,13 +18,13 @@ class ResizerService(IResizer):
             raise FileNotFoundError(f"File not found: {image_path}")
 
         try:
-            with Image.open(image_path) as img:
+            with load_image(image_path) as img:
                 # Use High Quality Resampling
                 resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
                 
                 directory = os.path.dirname(image_path)
                 filename = os.path.splitext(os.path.basename(image_path))[0]
-                output_path = os.path.join(directory, f"{filename}_resized_{width}x{height}.{img.format.lower()}")
+                output_path = os.path.join(directory, f"{filename}_resized_{width}x{height}.{img.format.lower() if img.format else 'png'}")
                 
                 resized_img.save(output_path, quality=AppConstants.DEFAULT_QUALITY)
                 return output_path
@@ -35,7 +36,7 @@ class ResizerService(IResizer):
             raise FileNotFoundError(f"File not found: {image_path}")
             
         try:
-            with Image.open(image_path) as img:
+            with load_image(image_path) as img:
                 width, height = img.size
                 new_width = int(width * (percentage / 100))
                 new_height = int(height * (percentage / 100))
