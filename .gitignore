@@ -28,4 +28,8 @@ wheels/
 
 *.log
 output/
-/Documents
+/Documents/*
+!/Documents/deneme.iss
+
+*.exe
+*.msi
