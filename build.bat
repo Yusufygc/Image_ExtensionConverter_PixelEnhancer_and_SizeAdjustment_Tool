@@ -8,7 +8,7 @@ REM Check if Nuitka is installed
 python -c "import nuitka" 2>NUL
 if %errorlevel% neq 0 (
     echo Nuitka is not installed. Installing...
-    pip install nuitka zstandard
+    pip install -r requirements-build.txt
 )
 
 echo Cleaning previous builds...
