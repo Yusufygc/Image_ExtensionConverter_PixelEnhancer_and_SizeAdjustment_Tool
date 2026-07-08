@@ -4,6 +4,7 @@ from PySide6.QtGui import QDragEnterEvent, QDropEvent, QIcon, QPixmap, QPainter
 from utils.path_helper import get_resource_path
 from utils.constants import AppConstants, AppIcons
 from utils.strings import UIStrings
+from ui.styles.theme import ThemeManager
 import os
 
 class DropZone(QFrame):
@@ -20,6 +21,14 @@ class DropZone(QFrame):
 
         self.setup_ui()
 
+    def update_icon(self):
+        icon = ThemeManager.get_themed_icon(AppIcons.UPLOAD, "accent")
+        if not icon.isNull():
+            self.icon_label.setPixmap(icon.pixmap(64, 64))
+        else:
+            self.icon_label.setText("📂")
+            self.icon_label.setStyleSheet("font-size: 48px;")
+
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignCenter)
@@ -28,15 +37,8 @@ class DropZone(QFrame):
         # Icon
         self.icon_label = QLabel()
         self.icon_label.setAlignment(Qt.AlignCenter)
-        self.icon_path = get_resource_path(AppIcons.UPLOAD)
-        if os.path.exists(self.icon_path):
-            pixmap = QPixmap(self.icon_path)
-            scaled_pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            
-            # Recolor pixmap to match theme? SVG usually handles color, 
-            # but if we want specific color we might need QIcon + paint. 
-            # For now relying on SVG color.
-            self.icon_label.setPixmap(scaled_pixmap)
+        self.icon_label.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.update_icon()
         
         layout.addWidget(self.icon_label)
 
@@ -44,6 +46,7 @@ class DropZone(QFrame):
         self.text_label = QLabel(UIStrings.DROPZONE_DEFAULT_TEXT)
         self.text_label.setObjectName("DropZoneText")
         self.text_label.setAlignment(Qt.AlignCenter)
+        self.text_label.setAttribute(Qt.WA_TransparentForMouseEvents)
         layout.addWidget(self.text_label)
 
     def _set_drag_active(self, active: bool):

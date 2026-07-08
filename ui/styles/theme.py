@@ -3,6 +3,8 @@ from PySide6.QtCore import QSettings
 from utils.path_helper import get_resource_path
 from utils.constants import AppIcons, AppConstants
 from ui.styles.tokens import THEMES
+from utils.svg_colorizer import get_tinted_icon, create_tinted_svg_file
+from PySide6.QtGui import QIcon
 import os
 import logging
 
@@ -58,10 +60,11 @@ class ThemeManager:
                     qss_template = f.read()
 
                 # For QSS, we need forward slashes even on Windows
+                arrow_color = THEMES[theme].get("text_muted", "#666666")
                 icon_paths = {
-                    "down_arrow": get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/"),
-                    "spin_up": get_resource_path(AppIcons.UP_ARROW).replace("\\", "/"),
-                    "spin_down": get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/"),
+                    "down_arrow": create_tinted_svg_file(get_resource_path(AppIcons.DOWN_ARROW), arrow_color).replace("\\", "/"),
+                    "spin_up": create_tinted_svg_file(get_resource_path(AppIcons.UP_ARROW), arrow_color).replace("\\", "/"),
+                    "spin_down": create_tinted_svg_file(get_resource_path(AppIcons.DOWN_ARROW), arrow_color).replace("\\", "/"),
                 }
 
                 qss = render_qss(qss_template, THEMES[theme], icon_paths)
@@ -80,3 +83,12 @@ class ThemeManager:
         new_theme = "light" if ThemeManager.current_theme == "dark" else "dark"
         ThemeManager.apply_theme(app, new_theme)
         return ThemeManager.current_theme
+
+    @staticmethod
+    def get_themed_icon(relative_path: str, color_token: str = "text_primary") -> QIcon:
+        """
+        Returns a dynamically tinted QIcon based on the current theme.
+        """
+        color_hex = THEMES[ThemeManager.current_theme].get(color_token, "#000000")
+        abs_path = get_resource_path(relative_path)
+        return get_tinted_icon(abs_path, color_hex)

@@ -39,7 +39,7 @@ def get_icon(relative_path):
     or None if the file doesn't exist - callers decide on a text/emoji fallback.
     """
     path = get_resource_path(relative_path)
-    if os.path.exists(path):
+    if os.path.exists(path) and os.path.getsize(path) > 0:
         return QIcon(path)
-    logger.warning("Icon not found: %s", path)
+    logger.warning("Icon not found or is empty: %s", path)
     return None

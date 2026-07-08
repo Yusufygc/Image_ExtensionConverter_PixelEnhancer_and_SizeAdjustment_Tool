@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QSpinBox, QDoubleSpinBox, QProgressBar, QMessageBox, QGroupBox, QListWidget,
                                QStackedWidget, QListWidgetItem, QLineEdit)
 from PySide6.QtCore import Qt, Slot, QSize, QSettings
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtGui import QShortcut, QKeySequence, QIcon
 
 from ui.widgets.drop_zone import DropZone
 from ui.styles.theme import ThemeManager, SETTINGS_ORGANIZATION
@@ -14,6 +14,7 @@ from core.converter import ConverterService
 from core.resizer import ResizerService
 from core.enhancer import EnhancerService
 from ui.widgets.file_list_item import FileListItemWidget
+from ui.widgets.toast import ToastNotification
 from utils.constants import AppConstants, AppIcons, UISpacing
 from utils.strings import UIStrings
 from utils.path_helper import get_icon
@@ -82,7 +83,6 @@ class MainWindow(QMainWindow):
         self.btn_theme_toggle.setObjectName("IconOnlyButton")
         self.btn_theme_toggle.setCursor(Qt.PointingHandCursor)
         self.btn_theme_toggle.clicked.connect(self.toggle_theme)
-        self._update_theme_toggle_icon()
         header_layout.addWidget(self.btn_theme_toggle)
 
         header_layout.addStretch() # Spacer Left
@@ -102,14 +102,20 @@ class MainWindow(QMainWindow):
         self.btn_info.setToolTip(UIStrings.TOOLTIP_INFO)
         self.btn_info.clicked.connect(self.toggle_info_page)
 
-        info_icon = get_icon(AppIcons.INFO)
-        if info_icon:
+        info_icon = ThemeManager.get_themed_icon(AppIcons.INFO, "text_primary")
+        if not info_icon.isNull():
             self.btn_info.setIcon(info_icon)
+            self.btn_info.setText("")
             self.btn_info.setIconSize(QSize(24, 24))
         else:
+            self.btn_info.setIcon(QIcon())
             self.btn_info.setText(UIStrings.FALLBACK_INFO)
 
         header_layout.addWidget(self.btn_info)
+        
+        # Initial call to set correct icons based on current theme
+        self._update_theme_toggle_icon()
+        
         return header_layout
 
     def setup_home_page(self, parent_widget):
@@ -117,26 +123,46 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(UISpacing.NONE, UISpacing.NONE, UISpacing.NONE, UISpacing.NONE)
         layout.setSpacing(UISpacing.LG)
 
-        layout.addWidget(self._build_file_selection_group(), stretch=1)
-        layout.addWidget(self._build_operation_group())
-        layout.addLayout(self._build_action_bar())
-        layout.addLayout(self._build_progress_section())
+        self.stepper_stack = QStackedWidget()
+        layout.addWidget(self.stepper_stack, stretch=1)
+
+        # Step 1: File Selection
+        self.step1_widget = QWidget()
+        step1_layout = QVBoxLayout(self.step1_widget)
+        step1_layout.setContentsMargins(0, 0, 0, 0)
+        step1_layout.addWidget(self._build_file_selection_group(), stretch=1)
+
+        self.btn_next_step = QPushButton("İleri ->")
+        self.btn_next_step.setObjectName("PrimaryButton")
+        self.btn_next_step.setMinimumHeight(40)
+        self.btn_next_step.setCursor(Qt.PointingHandCursor)
+        self.btn_next_step.clicked.connect(self.go_to_step_2)
+        step1_layout.addWidget(self.btn_next_step)
+        
+        self.stepper_stack.addWidget(self.step1_widget)
+
+        # Step 2: Settings and Process
+        self.step2_widget = QWidget()
+        step2_layout = QVBoxLayout(self.step2_widget)
+        step2_layout.setContentsMargins(0, 0, 0, 0)
+        step2_layout.addWidget(self._build_operation_group())
+        step2_layout.addStretch(1)
+        step2_layout.addLayout(self._build_action_bar())
+        step2_layout.addLayout(self._build_progress_section())
+
+        self.stepper_stack.addWidget(self.step2_widget)
 
     def _build_file_selection_group(self):
         group = QGroupBox(UIStrings.GROUP_FILE_SELECTION)
         h_layout = QHBoxLayout()
 
-        # Left side: Drop Zone + Browse Button
+        # Left side: Drop Zone
         left_layout = QVBoxLayout()
         self.drop_zone = DropZone()
         self.drop_zone.files_dropped.connect(self.add_files)
-
-        self.btn_browse = QPushButton(UIStrings.BTN_BROWSE)
-        self.btn_browse.clicked.connect(self.browse_files)
+        self.drop_zone.clicked.connect(self.browse_files)
 
         left_layout.addWidget(self.drop_zone, stretch=1)
-        left_layout.addSpacing(UISpacing.SM)
-        left_layout.addWidget(self.btn_browse)
 
         # Right side: File list + Clear Button
         right_layout = QVBoxLayout()
@@ -166,14 +192,20 @@ class MainWindow(QMainWindow):
     def _build_operation_group(self):
         op_group = QGroupBox(UIStrings.GROUP_OPERATION)
         op_layout = QVBoxLayout()
+        op_layout.setAlignment(Qt.AlignTop)
 
         self._build_option_widgets()
         self._register_operations()
 
+        op_form = QHBoxLayout()
+        lbl_op = QLabel("İşlem Türü:")
+        lbl_op.setMinimumWidth(150)
         self.combo_operation = QComboBox()
         self.combo_operation.addItems([op["label"] for op in self.operations])
         self.combo_operation.currentIndexChanged.connect(self.update_options_ui)
-        op_layout.addWidget(self.combo_operation)
+        op_form.addWidget(lbl_op)
+        op_form.addWidget(self.combo_operation, stretch=1)
+        op_layout.addLayout(op_form)
 
         self.options_container = QWidget()
         self.options_layout = QVBoxLayout(self.options_container)
@@ -193,56 +225,89 @@ class MainWindow(QMainWindow):
         action_layout = QVBoxLayout()
         action_layout.addWidget(self._build_output_folder_selector())
 
+        btn_layout = QHBoxLayout()
+        
+        self.btn_prev_step = QPushButton("<- Geri")
+        self.btn_prev_step.setMinimumHeight(50)
+        self.btn_prev_step.setCursor(Qt.PointingHandCursor)
+        self.btn_prev_step.clicked.connect(self.go_to_step_1)
+        btn_layout.addWidget(self.btn_prev_step)
+
         self.btn_process = QPushButton(UIStrings.BTN_PROCESS)
         self.btn_process.setObjectName("PrimaryButton")
         self.btn_process.setMinimumHeight(50)
+        self.btn_process.setCursor(Qt.PointingHandCursor)
         self.btn_process.clicked.connect(self.start_processing)
-        action_layout.addWidget(self.btn_process)
-
+        btn_layout.addWidget(self.btn_process, stretch=1)
+        
+        action_layout.addLayout(btn_layout)
         return action_layout
 
     def _build_option_widgets(self):
         # --- Conversion Options ---
         self.widget_convert = QWidget()
         wc_layout = QHBoxLayout(self.widget_convert)
-        wc_layout.addWidget(QLabel(UIStrings.LBL_TARGET_FORMAT))
+        wc_layout.setContentsMargins(0, 0, 0, 0)
+        
+        lbl_format = QLabel(UIStrings.LBL_TARGET_FORMAT)
+        lbl_format.setMinimumWidth(150)
+        wc_layout.addWidget(lbl_format)
+        
         self.combo_format = QComboBox()
         self.combo_format.addItems(AppConstants.SUPPORTED_FORMATS)
-        wc_layout.addWidget(self.combo_format)
+        wc_layout.addWidget(self.combo_format, stretch=1)
 
         # --- Resize Options ---
         self.widget_resize = QWidget()
         wr_layout = QVBoxLayout(self.widget_resize)
+        wr_layout.setContentsMargins(0, 0, 0, 0)
 
         type_layout = QHBoxLayout()
         self.combo_resize_type = QComboBox()
         self.combo_resize_type.addItems([UIStrings.RESIZE_METHOD_DIMENSIONS, UIStrings.RESIZE_METHOD_PERCENT])
         self.combo_resize_type.currentIndexChanged.connect(self.toggle_resize_inputs)
-        type_layout.addWidget(QLabel(UIStrings.LBL_RESIZE_METHOD))
-        type_layout.addWidget(self.combo_resize_type)
+        
+        lbl_method = QLabel(UIStrings.LBL_RESIZE_METHOD)
+        lbl_method.setMinimumWidth(150)
+        type_layout.addWidget(lbl_method)
+        type_layout.addWidget(self.combo_resize_type, stretch=1)
         wr_layout.addLayout(type_layout)
 
         self.input_resize_dims = QWidget()
-        ird_layout = QHBoxLayout(self.input_resize_dims)
+        ird_layout = QVBoxLayout(self.input_resize_dims)
+        ird_layout.setContentsMargins(0, 0, 0, 0)
+        
+        width_layout = QHBoxLayout()
         self.spin_width = QSpinBox()
         self.spin_width.setRange(1, 10000)
         self.spin_width.setValue(1920)
+        lbl_width = QLabel(UIStrings.LBL_WIDTH)
+        lbl_width.setMinimumWidth(150)
+        width_layout.addWidget(lbl_width)
+        width_layout.addWidget(self.spin_width, stretch=1)
+        ird_layout.addLayout(width_layout)
+        
+        height_layout = QHBoxLayout()
         self.spin_height = QSpinBox()
         self.spin_height.setRange(1, 10000)
         self.spin_height.setValue(1080)
-        ird_layout.addWidget(QLabel(UIStrings.LBL_WIDTH))
-        ird_layout.addWidget(self.spin_width)
-        ird_layout.addWidget(QLabel(UIStrings.LBL_HEIGHT))
-        ird_layout.addWidget(self.spin_height)
+        lbl_height = QLabel(UIStrings.LBL_HEIGHT)
+        lbl_height.setMinimumWidth(150)
+        height_layout.addWidget(lbl_height)
+        height_layout.addWidget(self.spin_height, stretch=1)
+        ird_layout.addLayout(height_layout)
 
         self.input_resize_percent = QWidget()
         self.input_resize_percent.setVisible(False)
         irp_layout = QHBoxLayout(self.input_resize_percent)
+        irp_layout.setContentsMargins(0, 0, 0, 0)
         self.spin_percent = QSpinBox()
         self.spin_percent.setRange(1, 500)
         self.spin_percent.setValue(50)
-        irp_layout.addWidget(QLabel(UIStrings.LBL_PERCENT))
-        irp_layout.addWidget(self.spin_percent)
+        lbl_percent = QLabel(UIStrings.LBL_PERCENT)
+        lbl_percent.setMinimumWidth(150)
+        irp_layout.addWidget(lbl_percent)
+        irp_layout.addWidget(self.spin_percent, stretch=1)
 
         wr_layout.addWidget(self.input_resize_dims)
         wr_layout.addWidget(self.input_resize_percent)
@@ -250,12 +315,17 @@ class MainWindow(QMainWindow):
         # --- Enhance Options ---
         self.widget_enhance = QWidget()
         we_layout = QHBoxLayout(self.widget_enhance)
-        we_layout.addWidget(QLabel(UIStrings.LBL_ENHANCE_FACTOR))
+        we_layout.setContentsMargins(0, 0, 0, 0)
+        
+        lbl_enhance = QLabel(UIStrings.LBL_ENHANCE_FACTOR)
+        lbl_enhance.setMinimumWidth(150)
+        we_layout.addWidget(lbl_enhance)
+        
         self.spin_factor = QDoubleSpinBox()
         self.spin_factor.setRange(1.1, 4.0)
         self.spin_factor.setSingleStep(0.5)
         self.spin_factor.setValue(2.0)
-        we_layout.addWidget(self.spin_factor)
+        we_layout.addWidget(self.spin_factor, stretch=1)
 
     def _register_operations(self):
         # Single source of truth for the combo box, options panel visibility and
@@ -311,10 +381,12 @@ class MainWindow(QMainWindow):
         self.btn_output_select.setToolTip(UIStrings.TOOLTIP_OUTPUT_SELECT)
         self.btn_output_select.clicked.connect(self.select_output_folder)
 
-        folder_icon = get_icon(AppIcons.FOLDER)
-        if folder_icon:
+        folder_icon = ThemeManager.get_themed_icon(AppIcons.FOLDER, "text_primary")
+        if not folder_icon.isNull():
             self.btn_output_select.setIcon(folder_icon)
+            self.btn_output_select.setText("")
         else:
+            self.btn_output_select.setIcon(QIcon())
             self.btn_output_select.setText(UIStrings.FALLBACK_FOLDER)
 
         path_layout.addWidget(self.line_output)
@@ -333,10 +405,8 @@ class MainWindow(QMainWindow):
 
     def set_app_instance(self, app):
         self.app_instance = app
+        self.app_instance = app
         ThemeManager.apply_theme(app)
-
-        # Connect DropZone click
-        self.drop_zone.clicked.connect(self.browse_files)
 
     @Slot()
     def toggle_theme(self):
@@ -346,39 +416,87 @@ class MainWindow(QMainWindow):
     def _update_theme_toggle_icon(self):
         # Icon/tooltip show the theme a click will switch TO (mirrors toggle_info_page's back-arrow swap).
         if ThemeManager.current_theme == "dark":
-            icon = get_icon(AppIcons.THEME_SUN)
+            icon = ThemeManager.get_themed_icon(AppIcons.THEME_SUN, "text_primary")
             fallback = UIStrings.FALLBACK_THEME_SUN
             tooltip = UIStrings.TOOLTIP_THEME_TOGGLE_TO_LIGHT
         else:
-            icon = get_icon(AppIcons.THEME_MOON)
+            icon = ThemeManager.get_themed_icon(AppIcons.THEME_MOON, "text_primary")
             fallback = UIStrings.FALLBACK_THEME_MOON
             tooltip = UIStrings.TOOLTIP_THEME_TOGGLE_TO_DARK
 
-        if icon:
+        if not icon.isNull():
             self.btn_theme_toggle.setIcon(icon)
+            self.btn_theme_toggle.setText("")
             self.btn_theme_toggle.setIconSize(QSize(24, 24))
         else:
+            self.btn_theme_toggle.setIcon(QIcon())
             self.btn_theme_toggle.setText(fallback)
         self.btn_theme_toggle.setToolTip(tooltip)
+        
+        # Also update other dynamically themed widgets if they exist
+        if hasattr(self, 'drop_zone'):
+            self.drop_zone.update_icon()
+        
+        for widget in self.file_item_widgets.values():
+            if hasattr(widget, 'update_icons'):
+                widget.update_icons()
+        
+        # And the info/back button and folder button
+        self.toggle_info_page(force_update=True)
+        self.update_folder_icon()
+
+    def update_folder_icon(self):
+        if hasattr(self, 'btn_output_select'):
+            folder_icon = ThemeManager.get_themed_icon(AppIcons.FOLDER, "text_primary")
+            if not folder_icon.isNull():
+                self.btn_output_select.setIcon(folder_icon)
 
     @Slot()
-    def toggle_info_page(self):
-        if self.stack.currentIndex() == 0:
-            self.stack.setCurrentIndex(1)
+    def toggle_info_page(self, force_update=False):
+        # We allow force_update when theme changes but page index stays same
+        is_info_page = False
+        if hasattr(self, 'stack'):
+            is_info_page = self.stack.currentIndex() == 1
+            
+            if not force_update:
+                if is_info_page:
+                    self.stack.setCurrentIndex(0)
+                    is_info_page = False
+                else:
+                    self.stack.setCurrentIndex(1)
+                    is_info_page = True
+
+        if is_info_page:
             # Switch to Back Arrow
-            back_icon = get_icon(AppIcons.BACK_ARROW)
-            if back_icon:
-                self.btn_info.setIcon(back_icon)
-            else:
-                self.btn_info.setText(UIStrings.FALLBACK_BACK)
+            if hasattr(self, 'btn_info'):
+                back_icon = ThemeManager.get_themed_icon(AppIcons.BACK_ARROW, "text_primary")
+                if not back_icon.isNull():
+                    self.btn_info.setIcon(back_icon)
+                    self.btn_info.setText("")
+                else:
+                    self.btn_info.setIcon(QIcon())
+                    self.btn_info.setText(UIStrings.FALLBACK_BACK)
         else:
-            self.stack.setCurrentIndex(0)
             # Switch back to Info Icon
-            info_icon = get_icon(AppIcons.INFO)
-            if info_icon:
-                self.btn_info.setIcon(info_icon)
-            else:
-                self.btn_info.setText(UIStrings.FALLBACK_INFO)
+            if hasattr(self, 'btn_info'):
+                info_icon = ThemeManager.get_themed_icon(AppIcons.INFO, "text_primary")
+                if not info_icon.isNull():
+                    self.btn_info.setIcon(info_icon)
+                    self.btn_info.setText("")
+                else:
+                    self.btn_info.setIcon(QIcon())
+                    self.btn_info.setText(UIStrings.FALLBACK_INFO)
+
+    @Slot()
+    def go_to_step_1(self):
+        self.stepper_stack.setCurrentIndex(0)
+
+    @Slot()
+    def go_to_step_2(self):
+        if not self.selected_files:
+            ToastNotification.show_message(self, "Lütfen önce dönüştürülecek dosyaları ekleyin.")
+            return
+        self.stepper_stack.setCurrentIndex(1)
 
     @Slot()
     def browse_files(self):

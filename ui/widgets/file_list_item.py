@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal, QSize
-from PySide6.QtGui import QPixmap, QImageReader
+from PySide6.QtGui import QPixmap, QImageReader, QIcon
 from utils.path_helper import get_resource_path, get_icon
-from utils.image_loader import load_image
 from utils.constants import AppIcons
+from utils.strings import UIStrings
+from ui.styles.theme import ThemeManager
+import os
 from utils.strings import UIStrings
 import os
 
@@ -67,16 +69,20 @@ class FileListItemWidget(QWidget):
         self.btn_remove.setObjectName("IconOnlyButton")
         self.btn_remove.setToolTip(UIStrings.TOOLTIP_REMOVE_FILE)
         
-        delete_icon = get_icon(AppIcons.DELETE)
-        if delete_icon:
-            self.btn_remove.setIcon(delete_icon)
-            self.btn_remove.setIconSize(QSize(16, 16))
-        else:
-            self.btn_remove.setText(UIStrings.FALLBACK_REMOVE)
-            
         self.btn_remove.clicked.connect(self.on_remove)
 
         layout.addWidget(self.btn_remove)
+        self.update_icons()
+
+    def update_icons(self):
+        delete_icon = ThemeManager.get_themed_icon(AppIcons.DELETE, "danger")
+        if not delete_icon.isNull():
+            self.btn_remove.setIcon(delete_icon)
+            self.btn_remove.setText("")
+            self.btn_remove.setIconSize(QSize(16, 16))
+        else:
+            self.btn_remove.setIcon(QIcon())
+            self.btn_remove.setText(UIStrings.FALLBACK_REMOVE)
 
     def load_thumbnail(self):
         # Async loading would be better but keeping it simple for now
@@ -97,7 +103,7 @@ class FileListItemWidget(QWidget):
 
             # Fallback icon
             fallback_path = get_resource_path(AppIcons.FILE)
-            if os.path.exists(fallback_path):
+            if os.path.exists(fallback_path) and os.path.getsize(fallback_path) > 0:
                  self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(28, 28, Qt.KeepAspectRatio))
             else:
                  self.thumb_label.setText(UIStrings.FALLBACK_THUMB_FILE)
