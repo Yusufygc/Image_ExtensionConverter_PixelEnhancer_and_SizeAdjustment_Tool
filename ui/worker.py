@@ -1,4 +1,5 @@
 from PySide6.QtCore import QThread, Signal, QObject
+from utils.strings import UIStrings
 
 class WorkerSignals(QObject):
     finished = Signal()
@@ -23,15 +24,16 @@ class ProcessingWorker(QThread):
                 break
 
             try:
-                self.signals.progress.emit(int((i / total) * 100), f"İşleniyor: {file_path}...")
+                self.signals.progress.emit(
+                    int((i / total) * 100), UIStrings.WORKER_PROGRESS_TEMPLATE.format(file=file_path))
                 output = self.service.process(file_path, **self.kwargs)
                 self.signals.result.emit(output)
             except Exception as e:
-                error_msg = f"Hata ({file_path}): {str(e)}"
+                error_msg = UIStrings.WORKER_ERROR_TEMPLATE.format(file=file_path, error=str(e))
                 self.errors.append(error_msg)
                 self.signals.error.emit(error_msg)
 
-        self.signals.progress.emit(100, "Tamamlandı!")
+        self.signals.progress.emit(100, UIStrings.WORKER_DONE)
         self.signals.finished.emit()
 
     def stop(self):

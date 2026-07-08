@@ -1,8 +1,10 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal, QSize
-from PySide6.QtGui import QIcon, QPixmap, QImageReader
-from utils.path_helper import get_resource_path
+from PySide6.QtGui import QPixmap, QImageReader
+from utils.path_helper import get_resource_path, get_icon
 from utils.image_loader import load_image
+from utils.constants import AppIcons
+from utils.strings import UIStrings
 import os
 
 class FileListItemWidget(QWidget):
@@ -58,12 +60,12 @@ class FileListItemWidget(QWidget):
         self.btn_remove.setCursor(Qt.PointingHandCursor)
         self.btn_remove.setObjectName("IconOnlyButton")
         
-        icon_path = get_resource_path("assets/icons/delete_icon.svg")
-        if os.path.exists(icon_path):
-            self.btn_remove.setIcon(QIcon(icon_path))
+        delete_icon = get_icon(AppIcons.DELETE)
+        if delete_icon:
+            self.btn_remove.setIcon(delete_icon)
             self.btn_remove.setIconSize(QSize(16, 16))
         else:
-            self.btn_remove.setText("X")
+            self.btn_remove.setText(UIStrings.FALLBACK_REMOVE)
             
         self.btn_remove.clicked.connect(self.on_remove)
 
@@ -87,14 +89,14 @@ class FileListItemWidget(QWidget):
                     return
 
             # Fallback icon
-            fallback_path = get_resource_path("assets/icons/file_icon.svg")
+            fallback_path = get_resource_path(AppIcons.FILE)
             if os.path.exists(fallback_path):
                  self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(24, 24, Qt.KeepAspectRatio))
             else:
-                 self.thumb_label.setText("📄")
+                 self.thumb_label.setText(UIStrings.FALLBACK_THUMB_FILE)
 
         except Exception:
-            self.thumb_label.setText("?")
+            self.thumb_label.setText(UIStrings.FALLBACK_THUMB_UNKNOWN)
 
     def format_size(self, size):
         for unit in ['B', 'KB', 'MB', 'GB']:

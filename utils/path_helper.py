@@ -2,6 +2,8 @@ import os
 import sys
 import logging
 
+from PySide6.QtGui import QIcon
+
 logger = logging.getLogger(__name__)
 
 def get_resource_path(relative_path):
@@ -29,3 +31,15 @@ def get_resource_path(relative_path):
     except Exception:
         logger.exception("Error resolving path for %s", relative_path)
         return relative_path
+
+
+def get_icon(relative_path):
+    """
+    Resolves relative_path via get_resource_path() and returns a QIcon,
+    or None if the file doesn't exist - callers decide on a text/emoji fallback.
+    """
+    path = get_resource_path(relative_path)
+    if os.path.exists(path):
+        return QIcon(path)
+    logger.warning("Icon not found: %s", path)
+    return None
