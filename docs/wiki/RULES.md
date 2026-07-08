@@ -10,6 +10,7 @@ Bu proje için commit ve kod kuralları. Wiki bağlamı: [[index]].
 - Derlenmiş ikili dosya (`.exe`, `.msi`, `dist/`, `build/`) **asla** commit'lenmez — bkz. [[build-ve-dagitim]]#repo-hijyeni-derlenmiş-ikili-dosyalar.
 - Yıkıcı git işlemleri (`push --force`, `filter-repo`, `reset --hard`) önce kullanıcıdan açık onay alınmadan yapılmaz; onay alınsa bile önce yedek (`git bundle`) alınır.
 - Sadece kullanıcı açıkça istediğinde commit atılır — kod değişikliği yapıldı diye otomatik commit atılmaz.
+- ai referansı verme 
 
 ## Kod Kuralları
 

@@ -2,6 +2,10 @@
 
 Kronolojik kayıt defteri. Yeni kayıtlar dosyanın **en üstüne** eklenir. Format: `## [YYYY-AA-GG] [İŞLEM_TİPİ] | Kısa Açıklama`. Navigasyon: [[index]].
 
+## [2026-07-08] FEAT | Token tabanlı dark/light tema sistemi + toggle buton
+
+`ui/styles/tokens.py`'ye `DARK_TOKENS` (Catppuccin Mocha) / `LIGHT_TOKENS` (Catppuccin Latte) eklendi; `assets/style/main.qss`'teki tüm literal renkler `@color_*` placeholder'larına çevrildi. `ThemeManager`'a saf `render_qss()`, `apply_theme(theme=None)`, `toggle_theme()` eklendi; tema tercihi `QSettings` ile kalıcı, ilk açılış varsayılanı `light`. Header'daki dengeleme amaçlı boş `dummy_btn` yerine gerçek `btn_theme_toggle` (sol üst, sun/moon ikonlu) geldi. `tests/test_theme.py` ile token anahtar eşitliği ve placeholder temizliği garanti altına alındı. QML'e geçiş ayrıca tartışıldı, kapsam dışı bırakıldı (mevcut ölçek için gerekçe yetersiz). Detay: [[tema-sistemi]].
+
 ## [2026-07-08] INGEST | LLM Wiki mekanizması kuruldu
 
 `docs/wiki/` bilgi tabanı ve `CLAUDE.md` "anayasa" dosyası oluşturuldu. Sayfalar: [[mimari]], [[core-servisleri]], [[arayuz-katmani]], [[merkezi-icon-ve-string-yapisi]], [[teknoloji-yigini]], [[build-ve-dagitim]], [[test-stratejisi]], [[RULES]]. Bundan sonra INGEST/QUERY/LINT komutları geçerli — detay `CLAUDE.md`'de.

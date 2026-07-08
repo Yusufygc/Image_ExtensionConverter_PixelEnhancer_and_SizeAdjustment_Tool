@@ -3,17 +3,18 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QLabel, QFileDialog, QComboBox,
                                QSpinBox, QDoubleSpinBox, QProgressBar, QMessageBox, QGroupBox, QListWidget,
                                QStackedWidget, QListWidgetItem, QLineEdit)
-from PySide6.QtCore import Qt, Slot, QSize
+from PySide6.QtCore import Qt, Slot, QSize, QSettings
+from PySide6.QtGui import QShortcut, QKeySequence
 
 from ui.widgets.drop_zone import DropZone
-from ui.styles.theme import ThemeManager
+from ui.styles.theme import ThemeManager, SETTINGS_ORGANIZATION
 from ui.views.info_view import InfoView
 from ui.worker import ProcessingWorker
 from core.converter import ConverterService
 from core.resizer import ResizerService
 from core.enhancer import EnhancerService
 from ui.widgets.file_list_item import FileListItemWidget
-from utils.constants import AppConstants, AppIcons
+from utils.constants import AppConstants, AppIcons, UISpacing
 from utils.strings import UIStrings
 from utils.path_helper import get_icon
 
@@ -39,17 +40,23 @@ class MainWindow(QMainWindow):
         self.current_worker = None
 
         self.selected_files = [] # List of paths
+        self.file_item_widgets = {} # file_path -> FileListItemWidget, for per-file status updates
         self.output_dir = dir_output_default
 
-        self.setup_ui()
+        # Resolve/apply the persisted theme before building widgets, so the
+        # header's theme-toggle button starts with the correct icon (no flash).
         ThemeManager.apply_theme(self.app_instance)
+        self.setup_ui()
+        self._restore_window_geometry()
+
+        QShortcut(QKeySequence("Ctrl+O"), self, activated=self.browse_files)
 
     def setup_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(UISpacing.LG)
+        main_layout.setContentsMargins(UISpacing.XL, UISpacing.XL, UISpacing.XL, UISpacing.XL)
 
         main_layout.addLayout(self._build_header())
 
@@ -69,10 +76,14 @@ class MainWindow(QMainWindow):
     def _build_header(self):
         header_layout = QHBoxLayout()
 
-        # Dummy spacer to balance the right button (for perfect centering)
-        dummy_btn = QWidget()
-        dummy_btn.setFixedSize(40, 40)
-        header_layout.addWidget(dummy_btn)
+        # Theme Toggle Button (balances the info button on the right)
+        self.btn_theme_toggle = QPushButton()
+        self.btn_theme_toggle.setFixedSize(40, 40)
+        self.btn_theme_toggle.setObjectName("IconOnlyButton")
+        self.btn_theme_toggle.setCursor(Qt.PointingHandCursor)
+        self.btn_theme_toggle.clicked.connect(self.toggle_theme)
+        self._update_theme_toggle_icon()
+        header_layout.addWidget(self.btn_theme_toggle)
 
         header_layout.addStretch() # Spacer Left
 
@@ -88,6 +99,7 @@ class MainWindow(QMainWindow):
         self.btn_info.setFixedSize(40, 40)
         self.btn_info.setObjectName("IconOnlyButton")
         self.btn_info.setCursor(Qt.PointingHandCursor)
+        self.btn_info.setToolTip(UIStrings.TOOLTIP_INFO)
         self.btn_info.clicked.connect(self.toggle_info_page)
 
         info_icon = get_icon(AppIcons.INFO)
@@ -102,14 +114,20 @@ class MainWindow(QMainWindow):
 
     def setup_home_page(self, parent_widget):
         layout = QVBoxLayout(parent_widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(20)
+        layout.setContentsMargins(UISpacing.NONE, UISpacing.NONE, UISpacing.NONE, UISpacing.NONE)
+        layout.setSpacing(UISpacing.LG)
 
         content_layout = QHBoxLayout()
+        # File selection group fills the row's full height (its file list has
+        # stretch=1). Operation group is intentionally NOT stretched - AlignTop
+        # keeps it at its natural (short) height instead of being force-expanded
+        # to match its taller sibling, which used to show as a dead gap inside
+        # the box.
         content_layout.addWidget(self._build_file_selection_group(), stretch=1)
-        content_layout.addWidget(self._build_operation_group(), stretch=1)
+        content_layout.addWidget(self._build_operation_group(), stretch=1, alignment=Qt.AlignTop)
         layout.addLayout(content_layout)
 
+        layout.addLayout(self._build_action_bar())
         layout.addLayout(self._build_progress_section())
 
     def _build_file_selection_group(self):
@@ -127,16 +145,16 @@ class MainWindow(QMainWindow):
         self.file_list.setSelectionMode(QListWidget.NoSelection) # Disable selection as we have buttons
 
         left_side_layout.addWidget(self.drop_zone)
-        left_side_layout.addSpacing(10)
+        left_side_layout.addSpacing(UISpacing.SM)
         left_side_layout.addWidget(self.btn_browse)
-        left_side_layout.addSpacing(15)
+        left_side_layout.addSpacing(UISpacing.MD)
 
         lbl_files = QLabel(UIStrings.LBL_SELECTED_FILES)
         lbl_files.setObjectName("SectionLabel")
         left_side_layout.addWidget(lbl_files)
 
-        left_side_layout.addWidget(self.file_list)
-        left_side_layout.addSpacing(10)
+        left_side_layout.addWidget(self.file_list, stretch=1)
+        left_side_layout.addSpacing(UISpacing.SM)
 
         self.btn_clear = QPushButton(UIStrings.BTN_CLEAR_FILES)
         self.btn_clear.setObjectName("DangerButton")
@@ -163,23 +181,33 @@ class MainWindow(QMainWindow):
 
         self.options_container = QWidget()
         self.options_layout = QVBoxLayout(self.options_container)
-        self.options_layout.setContentsMargins(0, 0, 0, 0)
+        self.options_layout.setContentsMargins(UISpacing.NONE, UISpacing.NONE, UISpacing.NONE, UISpacing.NONE)
         for op in self.operations:
             self.options_layout.addWidget(op["widget"])
         op_layout.addWidget(self.options_container)
         self.update_options_ui(0)
 
-        op_layout.addWidget(self._build_output_folder_selector())
-        op_layout.addSpacing(20)
+        # Leftover vertical space (this column is naturally shorter than the
+        # file selection column) collapses here instead of padding between rows.
+        op_layout.addStretch()
+
+        op_group.setLayout(op_layout)
+        return op_group
+
+    def _build_action_bar(self):
+        # Output folder + start button apply regardless of the chosen operation,
+        # so they live below both columns instead of being squeezed into the
+        # (naturally shorter) operation panel.
+        action_layout = QVBoxLayout()
+        action_layout.addWidget(self._build_output_folder_selector())
 
         self.btn_process = QPushButton(UIStrings.BTN_PROCESS)
         self.btn_process.setObjectName("PrimaryButton")
         self.btn_process.setMinimumHeight(50)
         self.btn_process.clicked.connect(self.start_processing)
-        op_layout.addWidget(self.btn_process)
+        action_layout.addWidget(self.btn_process)
 
-        op_group.setLayout(op_layout)
-        return op_group
+        return action_layout
 
     def _build_option_widgets(self):
         # --- Conversion Options ---
@@ -275,7 +303,7 @@ class MainWindow(QMainWindow):
     def _build_output_folder_selector(self):
         self.widget_output = QWidget()
         wo_layout = QVBoxLayout(self.widget_output)
-        wo_layout.setContentsMargins(0, 10, 0, 0)
+        wo_layout.setContentsMargins(UISpacing.NONE, UISpacing.SM, UISpacing.NONE, UISpacing.NONE)
 
         wo_layout.addWidget(QLabel(UIStrings.LBL_TARGET_FOLDER))
 
@@ -288,6 +316,7 @@ class MainWindow(QMainWindow):
         self.btn_output_select = QPushButton()
         self.btn_output_select.setFixedSize(36, 36)
         self.btn_output_select.setCursor(Qt.PointingHandCursor)
+        self.btn_output_select.setToolTip(UIStrings.TOOLTIP_OUTPUT_SELECT)
         self.btn_output_select.clicked.connect(self.select_output_folder)
 
         folder_icon = get_icon(AppIcons.FOLDER)
@@ -316,6 +345,29 @@ class MainWindow(QMainWindow):
 
         # Connect DropZone click
         self.drop_zone.clicked.connect(self.browse_files)
+
+    @Slot()
+    def toggle_theme(self):
+        ThemeManager.toggle_theme(self.app_instance)
+        self._update_theme_toggle_icon()
+
+    def _update_theme_toggle_icon(self):
+        # Icon/tooltip show the theme a click will switch TO (mirrors toggle_info_page's back-arrow swap).
+        if ThemeManager.current_theme == "dark":
+            icon = get_icon(AppIcons.THEME_SUN)
+            fallback = UIStrings.FALLBACK_THEME_SUN
+            tooltip = UIStrings.TOOLTIP_THEME_TOGGLE_TO_LIGHT
+        else:
+            icon = get_icon(AppIcons.THEME_MOON)
+            fallback = UIStrings.FALLBACK_THEME_MOON
+            tooltip = UIStrings.TOOLTIP_THEME_TOGGLE_TO_DARK
+
+        if icon:
+            self.btn_theme_toggle.setIcon(icon)
+            self.btn_theme_toggle.setIconSize(QSize(24, 24))
+        else:
+            self.btn_theme_toggle.setText(fallback)
+        self.btn_theme_toggle.setToolTip(tooltip)
 
     @Slot()
     def toggle_info_page(self):
@@ -357,16 +409,18 @@ class MainWindow(QMainWindow):
 
                 # Add Item to List Widget using Custom Widget
                 item = QListWidgetItem(self.file_list)
-                item.setSizeHint(QSize(0, 60)) # Set height for the item
+                item.setSizeHint(QSize(0, 68)) # Set height for the item (48px thumbnail + padding)
 
                 item_widget = FileListItemWidget(path)
                 item_widget.remove_clicked.connect(self.remove_file)
+                self.file_item_widgets[path] = item_widget
 
                 self.file_list.setItemWidget(item, item_widget)
 
     def remove_file(self, file_path):
         if file_path in self.selected_files:
             self.selected_files.remove(file_path)
+            self.file_item_widgets.pop(file_path, None)
 
             # Find and remove from list widget
             # Efficient way: iterate and find match (since we don't have direct mapping)
@@ -379,6 +433,7 @@ class MainWindow(QMainWindow):
 
     def clear_files(self):
         self.selected_files.clear()
+        self.file_item_widgets.clear()
         self.file_list.clear()
 
     @Slot(int)
@@ -406,12 +461,27 @@ class MainWindow(QMainWindow):
         if self.output_dir:
             kwargs['output_dir'] = self.output_dir
 
+        for widget in self.file_item_widgets.values():
+            widget.set_status("")
+
         self.btn_process.setEnabled(False)
         self.current_worker = ProcessingWorker(service, self.selected_files, **kwargs)
         self.current_worker.signals.progress.connect(self.update_progress)
         self.current_worker.signals.finished.connect(self.processing_finished)
         self.current_worker.signals.error.connect(self.processing_error)
+        self.current_worker.signals.file_started.connect(self.on_file_started)
+        self.current_worker.signals.file_done.connect(self.on_file_done)
         self.current_worker.start()
+
+    def on_file_started(self, file_path):
+        widget = self.file_item_widgets.get(file_path)
+        if widget:
+            widget.set_status("processing")
+
+    def on_file_done(self, file_path, success):
+        widget = self.file_item_widgets.get(file_path)
+        if widget:
+            widget.set_status("success" if success else "error")
 
     def update_progress(self, val, msg):
         self.progress_bar.setValue(val)
@@ -432,7 +502,17 @@ class MainWindow(QMainWindow):
         self.status_label.setText(UIStrings.STATUS_ERROR_GENERIC)
         QMessageBox.critical(self, UIStrings.MSG_ERROR_TITLE, err_msg)
 
+    def _window_settings(self):
+        return QSettings(SETTINGS_ORGANIZATION, AppConstants.APP_NAME)
+
+    def _restore_window_geometry(self):
+        geometry = self._window_settings().value("window_geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+
     def closeEvent(self, event):
+        self._window_settings().setValue("window_geometry", self.saveGeometry())
+
         if self.current_worker and self.current_worker.isRunning():
             self.current_worker.stop()
             self.current_worker.wait(3000)

@@ -1,41 +1,82 @@
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QSettings
 from utils.path_helper import get_resource_path
-from utils.constants import AppIcons
+from utils.constants import AppIcons, AppConstants
+from ui.styles.tokens import THEMES
 import os
 import logging
 
 logger = logging.getLogger(__name__)
 
+SETTINGS_ORGANIZATION = "MYY Yazılım"
+SETTINGS_KEY_THEME = "theme"
+DEFAULT_THEME = "light"
+
+
+def render_qss(qss_template: str, color_tokens: dict, icon_paths: dict) -> str:
+    """
+    Replaces @icon_<key> and @color_<key> placeholders in a QSS template.
+    Pure string operation - no QApplication/Qt widget dependency, so it's
+    directly unit-testable (see tests/test_theme.py).
+
+    Keys are processed longest-first: several token names share a prefix
+    (e.g. "border" / "border_strong"), so replacing the short key first would
+    corrupt the longer placeholder (leaves a stray "@color_border" match
+    inside "@color_border_strong", producing "#hex_strong").
+    """
+    qss = qss_template
+    for key, value in sorted(icon_paths.items(), key=lambda kv: -len(kv[0])):
+        qss = qss.replace(f"@icon_{key}", value)
+    for key, value in sorted(color_tokens.items(), key=lambda kv: -len(kv[0])):
+        qss = qss.replace(f"@color_{key}", value)
+    return qss
+
+
 class ThemeManager:
+    current_theme = DEFAULT_THEME
+
     @staticmethod
-    def apply_theme(app: QApplication):
+    def _settings() -> QSettings:
+        return QSettings(SETTINGS_ORGANIZATION, AppConstants.APP_NAME)
+
+    @staticmethod
+    def apply_theme(app: QApplication, theme: str = None):
         """
-        Loads the main.qss file, replaces placeholders with actual paths,
-        and applies it to the application.
+        Loads main.qss, resolves @icon_*/@color_* placeholders for the given
+        (or persisted) theme, and applies it to the application.
         """
+        if theme is None:
+            theme = ThemeManager._settings().value(SETTINGS_KEY_THEME, DEFAULT_THEME)
+        if theme not in THEMES:
+            theme = DEFAULT_THEME
+
         try:
-            # Load QSS from assets/style folder
             qss_path = get_resource_path(AppIcons.MAIN_QSS)
 
             if os.path.exists(qss_path):
                 with open(qss_path, "r", encoding='utf-8') as f:
-                    qss = f.read()
+                    qss_template = f.read()
 
-                    # Dynamically replace resource paths
-                    # For QSS, we need forward slashes even on Windows
-                    # ComboBox Arrow
-                    icon_down_path = get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/")
-                    qss = qss.replace("@icon_down_arrow", icon_down_path)
+                # For QSS, we need forward slashes even on Windows
+                icon_paths = {
+                    "down_arrow": get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/"),
+                    "spin_up": get_resource_path(AppIcons.UP_ARROW).replace("\\", "/"),
+                    "spin_down": get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/"),
+                }
 
-                    # SpinBox Arrows
-                    icon_spin_up = get_resource_path(AppIcons.UP_ARROW).replace("\\", "/")
-                    icon_spin_down = get_resource_path(AppIcons.DOWN_ARROW).replace("\\", "/")
-                    
-                    qss = qss.replace("@icon_spin_up", icon_spin_up)
-                    qss = qss.replace("@icon_spin_down", icon_spin_down)
-                    
-                    app.setStyleSheet(qss)
+                qss = render_qss(qss_template, THEMES[theme], icon_paths)
+                app.setStyleSheet(qss)
+
+                ThemeManager.current_theme = theme
+                ThemeManager._settings().setValue(SETTINGS_KEY_THEME, theme)
             else:
                 logger.warning("Stylesheet not found at %s", qss_path)
         except Exception:
             logger.exception("Error applying theme")
+
+    @staticmethod
+    def toggle_theme(app: QApplication) -> str:
+        """Flips light<->dark, applies it, and returns the new theme name."""
+        new_theme = "light" if ThemeManager.current_theme == "dark" else "dark"
+        ThemeManager.apply_theme(app, new_theme)
+        return ThemeManager.current_theme

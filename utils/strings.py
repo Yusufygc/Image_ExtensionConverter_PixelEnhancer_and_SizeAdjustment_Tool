@@ -50,11 +50,26 @@ class UIStrings:
     FALLBACK_REMOVE = "X"
     FALLBACK_THUMB_FILE = "📄"
     FALLBACK_THUMB_UNKNOWN = "?"
+    FALLBACK_THEME_SUN = "☀️"
+    FALLBACK_THEME_MOON = "🌙"
+
+    # --- Dosya listesi öğesi: işlem durumu rozeti ---
+    FILE_STATUS_PROCESSING = "⏳"
+    FILE_STATUS_SUCCESS = "✅"
+    FILE_STATUS_ERROR = "❌"
 
     # --- DropZone durum metinleri ---
     DROPZONE_DEFAULT_TEXT = "Resimleri Buraya Sürükleyin\nveya\nTıklayın"
     DROPZONE_DRAG_TEXT = "Bırak Gelsin! 📂"
     DROPZONE_UNSUPPORTED_TEXT = "Desteklenmeyen dosya türü ⚠️"
+
+    # --- Tooltip'ler ---
+    TOOLTIP_INFO = "Uygulama hakkında bilgi"
+    TOOLTIP_THEME_TOGGLE_TO_LIGHT = "Açık temaya geç"
+    TOOLTIP_THEME_TOGGLE_TO_DARK = "Koyu temaya geç"
+    TOOLTIP_OUTPUT_SELECT = "Hedef klasör seç"
+    TOOLTIP_REMOVE_FILE = "Listeden kaldır"
+    TOOLTIP_DROPZONE = "Resim dosyalarını buraya sürükleyip bırakın veya tıklayarak seçin (Ctrl+O)"
 
     # --- Worker (arka plan işlem) mesaj şablonları ---
     WORKER_PROGRESS_TEMPLATE = "İşleniyor: {file}..."

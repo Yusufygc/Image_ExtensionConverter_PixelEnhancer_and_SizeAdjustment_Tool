@@ -23,7 +23,7 @@ class FileListItemWidget(QWidget):
         # Thumbnail
         self.thumb_label = QLabel()
         self.thumb_label.setObjectName("ThumbLabel")
-        self.thumb_label.setFixedSize(40, 40)
+        self.thumb_label.setFixedSize(48, 48)
         self.thumb_label.setAlignment(Qt.AlignCenter)
         
         self.load_thumbnail()
@@ -54,11 +54,18 @@ class FileListItemWidget(QWidget):
         
         layout.addLayout(info_layout, stretch=1)
 
+        # Processing status badge (empty until the worker touches this file)
+        self.status_label = QLabel()
+        self.status_label.setFixedWidth(20)
+        self.status_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.status_label)
+
         # Remove Button
         self.btn_remove = QPushButton()
         self.btn_remove.setFixedSize(24, 24)
         self.btn_remove.setCursor(Qt.PointingHandCursor)
         self.btn_remove.setObjectName("IconOnlyButton")
+        self.btn_remove.setToolTip(UIStrings.TOOLTIP_REMOVE_FILE)
         
         delete_icon = get_icon(AppIcons.DELETE)
         if delete_icon:
@@ -82,7 +89,7 @@ class FileListItemWidget(QWidget):
                 reader = QImageReader(self.file_path)
                 original_size = reader.size()
                 if original_size.isValid():
-                    reader.setScaledSize(original_size.scaled(32, 32, Qt.KeepAspectRatio))
+                    reader.setScaledSize(original_size.scaled(40, 40, Qt.KeepAspectRatio))
                 image = reader.read()
                 if not image.isNull():
                     self.thumb_label.setPixmap(QPixmap.fromImage(image))
@@ -91,7 +98,7 @@ class FileListItemWidget(QWidget):
             # Fallback icon
             fallback_path = get_resource_path(AppIcons.FILE)
             if os.path.exists(fallback_path):
-                 self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(24, 24, Qt.KeepAspectRatio))
+                 self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(28, 28, Qt.KeepAspectRatio))
             else:
                  self.thumb_label.setText(UIStrings.FALLBACK_THUMB_FILE)
 
@@ -107,3 +114,12 @@ class FileListItemWidget(QWidget):
 
     def on_remove(self):
         self.remove_clicked.emit(self.file_path)
+
+    def set_status(self, status: str):
+        """status: 'processing' | 'success' | 'error' | '' (reset)"""
+        glyphs = {
+            "processing": UIStrings.FILE_STATUS_PROCESSING,
+            "success": UIStrings.FILE_STATUS_SUCCESS,
+            "error": UIStrings.FILE_STATUS_ERROR,
+        }
+        self.status_label.setText(glyphs.get(status, ""))

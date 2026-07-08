@@ -6,6 +6,8 @@ class WorkerSignals(QObject):
     error = Signal(str)
     progress = Signal(int, str) # value, message
     result = Signal(str) # output path
+    file_started = Signal(str) # file_path
+    file_done = Signal(str, bool) # file_path, success
 
 class ProcessingWorker(QThread):
     def __init__(self, service, files, **kwargs):
@@ -23,15 +25,18 @@ class ProcessingWorker(QThread):
             if not self._is_running:
                 break
 
+            self.signals.file_started.emit(file_path)
             try:
                 self.signals.progress.emit(
                     int((i / total) * 100), UIStrings.WORKER_PROGRESS_TEMPLATE.format(file=file_path))
                 output = self.service.process(file_path, **self.kwargs)
                 self.signals.result.emit(output)
+                self.signals.file_done.emit(file_path, True)
             except Exception as e:
                 error_msg = UIStrings.WORKER_ERROR_TEMPLATE.format(file=file_path, error=str(e))
                 self.errors.append(error_msg)
                 self.signals.error.emit(error_msg)
+                self.signals.file_done.emit(file_path, False)
 
         self.signals.progress.emit(100, UIStrings.WORKER_DONE)
         self.signals.finished.emit()

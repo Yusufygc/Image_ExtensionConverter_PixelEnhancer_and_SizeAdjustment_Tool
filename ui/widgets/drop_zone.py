@@ -16,6 +16,7 @@ class DropZone(QFrame):
         self.setAcceptDrops(True)
         self.setCursor(Qt.PointingHandCursor)
         self.setMinimumHeight(200)
+        self.setToolTip(UIStrings.TOOLTIP_DROPZONE)
 
         self.setup_ui()
 

@@ -2,7 +2,7 @@ class AppConstants:
     APP_NAME = "Uzantı Dönüştürücü ve Piksel Artırıcı"
     VERSION = "1.0.0"
     WINDOW_WIDTH = 1000
-    WINDOW_HEIGHT = 700
+    WINDOW_HEIGHT = 780
     
     # Desteklenen Formatlar
     SUPPORTED_FORMATS = [
@@ -30,4 +30,17 @@ class AppIcons:
     BACK_ARROW = "assets/icons/back_arrow.svg"
     DOWN_ARROW = "assets/icons/down-arrow.svg"
     UP_ARROW = "assets/icons/up-arrow.svg"
+    THEME_SUN = "assets/icons/sun.svg"
+    THEME_MOON = "assets/icons/moon.svg"
     MAIN_QSS = "assets/style/main.qss"
+
+
+class UISpacing:
+    """Named spacing scale for layout margins/gaps - values match what the
+    UI already used, just centralized so the rhythm stays consistent."""
+    NONE = 0
+    XS = 5
+    SM = 10
+    MD = 15
+    LG = 20
+    XL = 30
