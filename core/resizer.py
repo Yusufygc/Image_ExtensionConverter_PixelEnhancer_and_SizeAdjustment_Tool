@@ -14,9 +14,6 @@ class ResizerService(IResizer):
             raise ValueError("Invalid arguments for resizing")
 
     def resize_by_dimensions(self, image_path: str, width: int, height: int, output_dir: str = None) -> str:
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"File not found: {image_path}")
-
         try:
             with load_image(image_path) as img:
                 # Use High Quality Resampling
@@ -31,13 +28,12 @@ class ResizerService(IResizer):
                 
                 resized_img.save(output_path, quality=AppConstants.DEFAULT_QUALITY)
                 return output_path
+        except FileNotFoundError:
+            raise
         except Exception as e:
             raise Exception(f"Resizing failed: {str(e)}")
 
     def resize_by_percentage(self, image_path: str, percentage: int, output_dir: str = None) -> str:
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"File not found: {image_path}")
-            
         try:
             with load_image(image_path) as img:
                 width, height = img.size
@@ -45,5 +41,7 @@ class ResizerService(IResizer):
                 new_height = int(height * (percentage / 100))
                 
                 return self.resize_by_dimensions(image_path, new_width, new_height, output_dir)
+        except FileNotFoundError:
+            raise
         except Exception as e:
-             raise Exception(f"Resizing failed: {str(e)}")
+            raise Exception(f"Resizing failed: {str(e)}")

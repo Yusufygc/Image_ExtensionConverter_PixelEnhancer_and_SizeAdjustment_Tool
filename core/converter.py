@@ -11,9 +11,6 @@ class ConverterService(IConverter):
         return self.convert(image_path, output_format, output_dir=kwargs.get('output_dir'))
 
     def convert(self, image_path: str, output_format: str, output_path: str = None, output_dir: str = None) -> str:
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"File not found: {image_path}")
-
         try:
             with load_image(image_path) as img:
                 # Convert mode logic (e.g. RGBA to RGB for JPEG)
@@ -55,6 +52,8 @@ class ConverterService(IConverter):
                 
                 return output_path
 
+        except FileNotFoundError:
+            raise
         except Exception as e:
             # Clean up logic could go here if partial file created
             raise Exception(f"Conversion failed: {str(e)}")
