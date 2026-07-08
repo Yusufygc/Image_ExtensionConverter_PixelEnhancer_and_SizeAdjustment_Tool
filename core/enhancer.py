@@ -3,7 +3,6 @@ from PIL import Image, ImageFilter, ImageEnhance
 from core.interfaces import IEnhancer
 from utils.constants import AppConstants
 from utils.image_loader import load_image
-import os
 
 class EnhancerService(IEnhancer):
     def process(self, image_path: str, **kwargs) -> str:
@@ -17,13 +16,10 @@ class EnhancerService(IEnhancer):
                 new_width = int(width * factor)
                 new_height = int(height * factor)
                 
-                # Step 1: High Quality Upscaling
-                # LANCZOS is usually best for downscaling, but BICUBIC often preferred for upscaling unless downscaling too.
-                # Actually LANCZOS is generally good.
+                # Step 1: High quality upscaling with LANCZOS resampling
                 upscaled_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                
-                # Step 2: Sharpening to simulate "enhancement" (restore edges)
-                # Helps reduce the blur from interpolation
+
+                # Step 2: Sharpening to restore edges softened by interpolation
                 enhanced_img = upscaled_img.filter(ImageFilter.UnsharpMask(radius=2, percent=150, threshold=3))
 
                 # Step 3: Minimal Contrast/Color enhancement to make it "pop"
@@ -37,7 +33,7 @@ class EnhancerService(IEnhancer):
                 filename = os.path.splitext(os.path.basename(image_path))[0]
                 output_path = os.path.join(directory, f"{filename}_enhanced_x{factor}.{img.format.lower() if img.format else 'png'}")
                 
-                enhanced_img.save(output_path, quality=95) # Higher quality for enhanced images
+                enhanced_img.save(output_path, quality=AppConstants.ENHANCED_QUALITY)
                 return output_path
         except Exception as e:
             raise Exception(f"Enhancement failed: {str(e)}")
