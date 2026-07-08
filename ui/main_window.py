@@ -117,55 +117,51 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(UISpacing.NONE, UISpacing.NONE, UISpacing.NONE, UISpacing.NONE)
         layout.setSpacing(UISpacing.LG)
 
-        content_layout = QHBoxLayout()
-        # File selection group fills the row's full height (its file list has
-        # stretch=1). Operation group is intentionally NOT stretched - AlignTop
-        # keeps it at its natural (short) height instead of being force-expanded
-        # to match its taller sibling, which used to show as a dead gap inside
-        # the box.
-        content_layout.addWidget(self._build_file_selection_group(), stretch=1)
-        content_layout.addWidget(self._build_operation_group(), stretch=1, alignment=Qt.AlignTop)
-        layout.addLayout(content_layout)
-
+        layout.addWidget(self._build_file_selection_group(), stretch=1)
+        layout.addWidget(self._build_operation_group())
         layout.addLayout(self._build_action_bar())
         layout.addLayout(self._build_progress_section())
 
     def _build_file_selection_group(self):
-        left_side_group = QGroupBox(UIStrings.GROUP_FILE_SELECTION)
-        left_side_layout = QVBoxLayout()
+        group = QGroupBox(UIStrings.GROUP_FILE_SELECTION)
+        h_layout = QHBoxLayout()
 
+        # Left side: Drop Zone + Browse Button
+        left_layout = QVBoxLayout()
         self.drop_zone = DropZone()
         self.drop_zone.files_dropped.connect(self.add_files)
 
         self.btn_browse = QPushButton(UIStrings.BTN_BROWSE)
         self.btn_browse.clicked.connect(self.browse_files)
 
-        # File list appearance comes from the global QListWidget rule in assets/style/main.qss
-        self.file_list = QListWidget()
-        self.file_list.setSelectionMode(QListWidget.NoSelection) # Disable selection as we have buttons
+        left_layout.addWidget(self.drop_zone, stretch=1)
+        left_layout.addSpacing(UISpacing.SM)
+        left_layout.addWidget(self.btn_browse)
 
-        left_side_layout.addWidget(self.drop_zone)
-        left_side_layout.addSpacing(UISpacing.SM)
-        left_side_layout.addWidget(self.btn_browse)
-        left_side_layout.addSpacing(UISpacing.MD)
-
+        # Right side: File list + Clear Button
+        right_layout = QVBoxLayout()
         lbl_files = QLabel(UIStrings.LBL_SELECTED_FILES)
         lbl_files.setObjectName("SectionLabel")
-        left_side_layout.addWidget(lbl_files)
+        right_layout.addWidget(lbl_files)
 
-        left_side_layout.addWidget(self.file_list, stretch=1)
-        left_side_layout.addSpacing(UISpacing.SM)
+        self.file_list = QListWidget()
+        self.file_list.setSelectionMode(QListWidget.NoSelection)
+        right_layout.addWidget(self.file_list, stretch=1)
 
+        right_layout.addSpacing(UISpacing.SM)
         self.btn_clear = QPushButton(UIStrings.BTN_CLEAR_FILES)
         self.btn_clear.setObjectName("DangerButton")
         self.btn_clear.setMinimumHeight(40)
         self.btn_clear.setCursor(Qt.PointingHandCursor)
         self.btn_clear.clicked.connect(self.clear_files)
+        right_layout.addWidget(self.btn_clear)
 
-        left_side_layout.addWidget(self.btn_clear)
+        h_layout.addLayout(left_layout, stretch=1)
+        h_layout.addSpacing(UISpacing.LG)
+        h_layout.addLayout(right_layout, stretch=2)
 
-        left_side_group.setLayout(left_side_layout)
-        return left_side_group
+        group.setLayout(h_layout)
+        return group
 
     def _build_operation_group(self):
         op_group = QGroupBox(UIStrings.GROUP_OPERATION)
@@ -186,10 +182,6 @@ class MainWindow(QMainWindow):
             self.options_layout.addWidget(op["widget"])
         op_layout.addWidget(self.options_container)
         self.update_options_ui(0)
-
-        # Leftover vertical space (this column is naturally shorter than the
-        # file selection column) collapses here instead of padding between rows.
-        op_layout.addStretch()
 
         op_group.setLayout(op_layout)
         return op_group
