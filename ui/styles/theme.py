@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QApplication
 from utils.path_helper import get_resource_path
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ThemeManager:
     @staticmethod
@@ -32,6 +35,6 @@ class ThemeManager:
                     
                     app.setStyleSheet(qss)
             else:
-                print(f"Warning: Stylesheet not found at {qss_path}")
-        except Exception as e:
-            print(f"Error applying theme: {e}")
+                logger.warning("Stylesheet not found at %s", qss_path)
+        except Exception:
+            logger.exception("Error applying theme")

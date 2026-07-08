@@ -1,5 +1,8 @@
 import os
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_resource_path(relative_path):
     """
@@ -23,6 +26,6 @@ def get_resource_path(relative_path):
             base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         return os.path.join(base_path, relative_path)
-    except Exception as e:
-        print(f"Error resolving path: {e}")
+    except Exception:
+        logger.exception("Error resolving path for %s", relative_path)
         return relative_path
