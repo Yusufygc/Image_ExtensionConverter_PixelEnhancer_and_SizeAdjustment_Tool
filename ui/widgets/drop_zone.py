@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout
-from PySide6.QtCore import Qt, Signal, QSize
+from PySide6.QtCore import Qt, Signal, QSize, QTimer
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QIcon, QPixmap, QPainter
 from utils.path_helper import get_resource_path
+from utils.constants import AppConstants
 import os
 
 class DropZone(QFrame):
@@ -39,9 +40,14 @@ class DropZone(QFrame):
 
         # Text
         self.text_label = QLabel("Resimleri Buraya Sürükleyin\nveya\nTıklayın")
+        self.text_label.setObjectName("DropZoneText")
         self.text_label.setAlignment(Qt.AlignCenter)
-        self.text_label.setStyleSheet("font-size: 16px; color: #a6adc8; font-weight: bold;")
         layout.addWidget(self.text_label)
+
+    def _set_drag_active(self, active: bool):
+        self.setProperty("dragActive", active)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -52,22 +58,36 @@ class DropZone(QFrame):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
             self.text_label.setText("Bırak Gelsin! 📂")
-            self.setStyleSheet("#DropZone { border-color: #a6e3a1; background-color: rgba(166, 227, 161, 0.1); }")
+            self._set_drag_active(True)
 
     def dragLeaveEvent(self, event):
         self.text_label.setText("Resimleri Buraya Sürükleyin\nveya\nTıklayın")
-        self.setStyleSheet("") # Revert to stylesheet default
-        
+        self._set_drag_active(False)
+
     def dropEvent(self, event: QDropEvent):
-        self.text_label.setText("Resimleri Buraya Sürükleyin\nveya\nTıklayın")
-        self.setStyleSheet("")
-        
+        self._set_drag_active(False)
+
         files = []
+        skipped = 0
         if event.mimeData().hasUrls():
             for url in event.mimeData().urls():
                 file_path = url.toLocalFile()
-                if file_path:
+                if not file_path:
+                    continue
+                ext = os.path.splitext(file_path)[1].lower()
+                if ext in AppConstants.SUPPORTED_EXTENSIONS:
                     files.append(file_path)
-            
+                else:
+                    skipped += 1
+
             if files:
                 self.files_dropped.emit(files)
+
+        if skipped and not files:
+            self.text_label.setText("Desteklenmeyen dosya türü ⚠️")
+            QTimer.singleShot(2000, self._reset_text)
+        else:
+            self.text_label.setText("Resimleri Buraya Sürükleyin\nveya\nTıklayın")
+
+    def _reset_text(self):
+        self.text_label.setText("Resimleri Buraya Sürükleyin\nveya\nTıklayın")
