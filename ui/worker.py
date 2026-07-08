@@ -14,20 +14,23 @@ class ProcessingWorker(QThread):
         self.kwargs = kwargs
         self.signals = WorkerSignals()
         self._is_running = True
+        self.errors = []
 
     def run(self):
         total = len(self.files)
         for i, file_path in enumerate(self.files):
             if not self._is_running:
                 break
-            
+
             try:
                 self.signals.progress.emit(int((i / total) * 100), f"İşleniyor: {file_path}...")
                 output = self.service.process(file_path, **self.kwargs)
                 self.signals.result.emit(output)
             except Exception as e:
-                self.signals.error.emit(f"Hata ({file_path}): {str(e)}")
-        
+                error_msg = f"Hata ({file_path}): {str(e)}"
+                self.errors.append(error_msg)
+                self.signals.error.emit(error_msg)
+
         self.signals.progress.emit(100, "Tamamlandı!")
         self.signals.finished.emit()
 
