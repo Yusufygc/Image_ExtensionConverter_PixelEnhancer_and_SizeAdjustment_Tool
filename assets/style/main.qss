@@ -168,20 +168,88 @@ QComboBox QAbstractItemView {
     padding: 5px;
 }
 
-/* Drop Zone */
-QLabel#DropZone {
+/* Drop Zone (QFrame, not QLabel - the widget itself carries the DropZone objectName) */
+QFrame#DropZone {
     border: 2px dashed #585b70;
     border-radius: 16px;
     background-color: rgba(30, 30, 46, 0.5);
-    color: #bac2de;
-    font-size: 18px;
-    font-weight: 500;
 }
 
-QLabel#DropZone:hover {
+QFrame#DropZone:hover {
     border-color: #89b4fa;
     background-color: rgba(137, 180, 250, 0.1);
+}
+
+QFrame#DropZone[dragActive="true"] {
+    border-color: #a6e3a1;
+    background-color: rgba(166, 227, 161, 0.1);
+}
+
+QLabel#DropZoneText {
+    font-size: 16px;
+    color: #a6adc8;
+    font-weight: bold;
+}
+
+/* Header Title */
+QLabel#TitleLabel {
+    font-size: 24px;
+    font-weight: bold;
     color: #89b4fa;
+}
+
+/* Generic bold section label (e.g. "Seçilen Dosyalar:") */
+QLabel#SectionLabel {
+    font-weight: bold;
+    color: #cdd6f4;
+}
+
+/* Flat icon-only buttons (info, remove-file, back arrow, etc.) */
+QPushButton#IconOnlyButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+}
+
+QPushButton#IconOnlyButton:hover {
+    background-color: rgba(243, 139, 168, 0.2);
+}
+
+/* File list item widgets */
+QLabel#ThumbLabel {
+    background-color: #313244;
+    border-radius: 4px;
+}
+
+QLabel#FileNameLabel {
+    font-weight: bold;
+    color: #cdd6f4;
+}
+
+QLabel#FileSizeLabel {
+    color: #a6adc8;
+    font-size: 12px;
+}
+
+/* Info page */
+QLabel#VersionLabel {
+    font-size: 16px;
+    color: #a6adc8;
+}
+
+QLabel#InfoContentLabel {
+    background-color: rgba(30, 30, 46, 0.5);
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 16px;
+    color: #cdd6f4;
+}
+
+QLabel#FooterLabel {
+    font-size: 14px;
+    color: #585b70;
+    font-weight: bold;
 }
 
 /* List Widget */

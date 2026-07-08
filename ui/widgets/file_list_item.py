@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal, QSize
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QImageReader
 from utils.path_helper import get_resource_path
 from utils.image_loader import load_image
 import os
@@ -20,8 +20,8 @@ class FileListItemWidget(QWidget):
 
         # Thumbnail
         self.thumb_label = QLabel()
+        self.thumb_label.setObjectName("ThumbLabel")
         self.thumb_label.setFixedSize(40, 40)
-        self.thumb_label.setStyleSheet("background-color: #313244; border-radius: 4px;")
         self.thumb_label.setAlignment(Qt.AlignCenter)
         
         self.load_thumbnail()
@@ -37,16 +37,17 @@ class FileListItemWidget(QWidget):
             size_str = self.format_size(size_bytes)
             
             self.name_label = QLabel(name)
-            self.name_label.setStyleSheet("font-weight: bold; color: #cdd6f4;")
-            
+            self.name_label.setObjectName("FileNameLabel")
+
             self.size_label = QLabel(f"({size_str})")
-            self.size_label.setStyleSheet("color: #a6adc8; font-size: 12px;")
+            self.size_label.setObjectName("FileSizeLabel")
             
             info_layout.addWidget(self.name_label)
             info_layout.addWidget(self.size_label)
             info_layout.addStretch()
         except Exception:
             self.name_label = QLabel(os.path.basename(self.file_path))
+            self.name_label.setObjectName("FileNameLabel")
             info_layout.addWidget(self.name_label)
         
         layout.addLayout(info_layout, stretch=1)
@@ -65,17 +66,7 @@ class FileListItemWidget(QWidget):
             self.btn_remove.setText("X")
             
         self.btn_remove.clicked.connect(self.on_remove)
-        self.btn_remove.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: none;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: rgba(243, 139, 168, 0.2);
-            }
-        """)
-        
+
         layout.addWidget(self.btn_remove)
 
     def load_thumbnail(self):
@@ -84,21 +75,15 @@ class FileListItemWidget(QWidget):
         try:
             # First check if it's an image
             ext = os.path.splitext(self.file_path)[1].lower()
-            if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.gif', '.ico', '.webp']:
-                # Use QIcon default caching or load small
-                # Using QPixmap from path directly might be slow for big images
-                # Try creating a thumbnail
-                pixmap = QPixmap(self.file_path)
-                if not pixmap.isNull():
-                    scaled = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-                    self.thumb_label.setPixmap(scaled)
-                    return
-            elif ext == '.svg':
-                 # SVG support
-                 pixmap = QPixmap(self.file_path)
-                 if not pixmap.isNull():
-                    scaled = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-                    self.thumb_label.setPixmap(scaled)
+            if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.gif', '.ico', '.webp', '.svg']:
+                # Decode directly at target size instead of loading full resolution
+                reader = QImageReader(self.file_path)
+                original_size = reader.size()
+                if original_size.isValid():
+                    reader.setScaledSize(original_size.scaled(32, 32, Qt.KeepAspectRatio))
+                image = reader.read()
+                if not image.isNull():
+                    self.thumb_label.setPixmap(QPixmap.fromImage(image))
                     return
 
             # Fallback icon

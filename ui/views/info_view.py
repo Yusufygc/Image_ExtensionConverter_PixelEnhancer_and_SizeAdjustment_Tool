@@ -14,24 +14,15 @@ class InfoView(QWidget):
 
         # Version (Title removed as it is in header)
         version = QLabel(f"Versiyon: {AppConstants.VERSION}")
-        version.setStyleSheet("font-size: 16px; color: #a6adc8;")
+        version.setObjectName("VersionLabel")
         version.setAlignment(Qt.AlignCenter)
         layout.addWidget(version)
 
         # Content (Instructions)
         content = QLabel()
+        content.setObjectName("InfoContentLabel")
         content.setWordWrap(True)
         content.setOpenExternalLinks(True)
-        content.setStyleSheet("""
-            QLabel {
-                background-color: rgba(30, 30, 46, 0.5);
-                border: 1px solid #45475a;
-                border-radius: 8px;
-                padding: 20px;
-                font-size: 16px;
-                color: #cdd6f4;
-            }
-        """)
         
         html_content = """
         <h3 style="color: #fab387; margin-bottom: 10px;">Nasıl Kullanılır?</h3>
@@ -58,6 +49,6 @@ class InfoView(QWidget):
 
         # Footer
         footer = QLabel("Geliştirici : MYY Yazılım")
-        footer.setStyleSheet("font-size: 14px; color: #585b70; font-weight: bold;")
+        footer.setObjectName("FooterLabel")
         footer.setAlignment(Qt.AlignCenter)
         layout.addWidget(footer)
