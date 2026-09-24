@@ -28,26 +28,27 @@ QtObject {
 
     // Dynamic Colors based on isDark
     // Dark mod paleti: "Snack at Midnight" (Mulberry Night / Champagne Silk / Indigo Tart / Glace Apricot / Crushed Cacao)
-    readonly property color bgApp: isDark ? "#0F0807" : "#F3F3F3"
+    // Light mod paleti: "Aqua Nebula" (Midnight Abyss / Atlantic Steel / Tidepool Teal / Summer Surf / Glacier Mist)
+    readonly property color bgApp: isDark ? "#0F0807" : "#DEF2FF"
     readonly property color bgSecondary: isDark ? "#29161D" : "#FFFFFF"
     readonly property color bgCard: isDark ? "#432430" : "#FFFFFF"
-    readonly property color bgCardHover: isDark ? "#4E2C39" : "#F8F8F8"
-    readonly property color bgCardActive: isDark ? "#341C26" : "#F0F0F0"
+    readonly property color bgCardHover: isDark ? "#4E2C39" : "#EAF6FF"
+    readonly property color bgCardActive: isDark ? "#341C26" : "#D8EEFB"
     readonly property color bgInput: isDark ? "#1C0F13" : "#FFFFFF"
 
-    readonly property color borderSubtle: isDark ? "#3A2028" : "#E2E2E2"
-    readonly property color borderCard: isDark ? "#43242E" : "#E5E5E5"
-    readonly property color borderHover: isDark ? "#5C3542" : "#CCCCCC"
+    readonly property color borderSubtle: isDark ? "#3A2028" : "#CFE6F2"
+    readonly property color borderCard: isDark ? "#43242E" : "#C7E4F5"
+    readonly property color borderHover: isDark ? "#5C3542" : "#2FA0C6"
 
-    readonly property color textPrimary: isDark ? "#CEB3AB" : "#1A1A1A"
-    readonly property color textSecondary: isDark ? "#A6897F" : "#606060"
-    readonly property color textMuted: isDark ? "#7D645C" : "#8A8A8A"
+    readonly property color textPrimary: isDark ? "#CEB3AB" : "#061826"
+    readonly property color textSecondary: isDark ? "#A6897F" : "#1C4E75"
+    readonly property color textMuted: isDark ? "#7D645C" : "#5E85A3"
 
-    readonly property color accent: isDark ? "#E8AC97" : "#0067C0"
-    readonly property color accentHover: isDark ? "#F0C0AE" : "#1878D0"
-    readonly property color accentActive: isDark ? "#D89A82" : "#005BA6"
+    readonly property color accent: isDark ? "#E8AC97" : "#2FA0C6"
+    readonly property color accentHover: isDark ? "#F0C0AE" : "#58C9F3"
+    readonly property color accentActive: isDark ? "#D89A82" : "#227E9C"
     readonly property color accentText: isDark ? "#2A1418" : "#FFFFFF"
-    readonly property color tabActiveBg: isDark ? "#2A3548" : "#CFEAF9"
+    readonly property color tabActiveBg: isDark ? "#2A3548" : "#BDE5FF"
     
     readonly property color danger: isDark ? "#FF5555" : "#C42B1C"
     readonly property color dangerHover: isDark ? "#FF6E6E" : "#D1382A"

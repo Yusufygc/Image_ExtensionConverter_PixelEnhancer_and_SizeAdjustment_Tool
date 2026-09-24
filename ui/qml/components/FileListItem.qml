@@ -98,7 +98,7 @@ Rectangle {
                 height: 16
                 width: fmtBadgeText.implicitWidth + 8
                 radius: 3
-                color: FluentTheme.isDark ? "#4E2C39" : "#E2E2E2"
+                color: FluentTheme.isDark ? "#4E2C39" : "#D8EEFB"
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {

@@ -29,7 +29,11 @@ Mevcut ikonların çoğu (`info_icon.svg`, `delete_icon.svg` vb.) stroke rengi S
 
 Yukarıdaki `ui/styles/theme.py` + `tokens.py` + `main.qss` zinciri eski QtWidgets arayüzüne (`ui/main_window.py`) ait — [[arayuz-katmani]]'nde belirtildiği gibi geriye dönük referans olarak duruyor, artık kullanılmıyor. Güncel QML arayüzü (`ui/qml/`) kendi tema kaynağını kullanıyor: `ui/qml/FluentTheme.qml`, `pragma Singleton` ile tekil QtObject, `isDark` bool'una göre `bgApp/bgCard/textPrimary/accent/...` renklerini ternary ile döndürüyor. `Main.qml` bunu `bridge.currentTheme`'e göre günceller.
 
-**Dark mod paleti — "Snack at Midnight":** kullanıcı isteğiyle 2026-09-24'te uygulanan dark tema rengi: Mulberry Night `#432430` (kart/panel yüzeyleri), Champagne Silk `#CEB3AB` (birincil metin), Indigo Tart `#2A3548` (seçili sekme/dosya vurgusu — sıcak zemine soğuk kontrast), Glace Apricot `#E8AC97` (accent — buton/ilerleme/odak rengi), Crushed Cacao `#0F0807` (en dış app arka planı). Light mod paleti değişmedi. Detay ve tüm token eşlemesi `ui/qml/FluentTheme.qml` içinde. Bu paletle çakışan, `FluentTheme` token'larını bypass eden component-lokal hardcoded gri renkler (`FluentButton`, `FluentIconButton`, `FluentScrollBar`, `FluentProgressBar`, `DropZoneArea`, `FileCardItem`, `FileListItem`, `FluentComboBox`) aynı geçişte sıcak palete hizalandı.
+**Dark mod paleti — "Snack at Midnight":** kullanıcı isteğiyle 2026-09-24'te uygulanan dark tema rengi: Mulberry Night `#432430` (kart/panel yüzeyleri), Champagne Silk `#CEB3AB` (birincil metin), Indigo Tart `#2A3548` (seçili sekme/dosya vurgusu — sıcak zemine soğuk kontrast), Glace Apricot `#E8AC97` (accent — buton/ilerleme/odak rengi), Crushed Cacao `#0F0807` (en dış app arka planı).
+
+**Light mod paleti — "Aqua Nebula":** aynı gün ayrıca uygulandı: Midnight Abyss `#061826` (birincil metin), Atlantic Steel `#1C4E75` (ikincil metin), Tidepool Teal `#2FA0C6` (accent — buton/ilerleme/odak rengi), Summer Surf `#58C9F3` (accent hover), Glacier Mist `#BDE5FF` (seçili sekme dolgusu, en soluk vurgu). App arka planı Glacier Mist'in beyazla seyreltilmiş hali `#DEF2FF`, kartlar beyaz kalıyor (kontrast için).
+
+Detay ve tüm token eşlemesi `ui/qml/FluentTheme.qml` içinde. Her iki palette de çakışan, `FluentTheme` token'larını bypass eden component-lokal hardcoded gri renkler (`FluentButton`, `FluentIconButton`, `FluentScrollBar`, `FluentProgressBar`, `DropZoneArea`, `FileCardItem`, `FileListItem`, `FluentComboBox`) aynı geçişlerde ilgili palete hizalandı.
 
 ## Yeni token eklerken
 

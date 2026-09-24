@@ -2,6 +2,13 @@
 
 Kronolojik kayıt defteri. Yeni kayıtlar dosyanın **en üstüne** eklenir. Format: `## [YYYY-AA-GG] [İŞLEM_TİPİ] | Kısa Açıklama`. Navigasyon: [[index]].
 
+## [2026-09-24] FEAT | Light mod "Aqua Nebula" renk paleti uygulandı
+
+- `ui/qml/FluentTheme.qml`: light mod renkleri kullanıcının verdiği palete göre değiştirildi — bgApp `#DEF2FF`, textPrimary Midnight Abyss `#061826`, textSecondary Atlantic Steel `#1C4E75`, accent Tidepool Teal `#2FA0C6`, accentHover Summer Surf `#58C9F3`, tabActiveBg/seçili durum Glacier Mist `#BDE5FF`. Dark mod dokunulmadı.
+- Aynı çakışan component-lokal hardcoded renklerin (dark palet geçişinde güncellenenlerle aynı liste) light dalları da aqua tonlara hizalandı.
+
+İlgili: [[tema-sistemi]]
+
 ## [2026-09-24] FEAT | Dark mod "Snack at Midnight" renk paleti uygulandı, header ikonu ve spinbox kutuları kaldırıldı, toast üst-orta konuma taşındı
 
 - `ui/qml/FluentTheme.qml`: dark mod renkleri kullanıcının verdiği palet görseline göre değiştirildi — bgApp `#0F0807` (Crushed Cacao), bgCard `#432430` (Mulberry Night), textPrimary `#CEB3AB` (Champagne Silk), accent `#E8AC97` (Glace Apricot), tabActiveBg/seçili durum `#2A3548` (Indigo Tart). Light mod dokunulmadı.

@@ -48,9 +48,7 @@ Rectangle {
 
         property color strokeColor: root.popupOpen
             ? FluentTheme.accent
-            : (mouseArea.containsMouse
-               ? (FluentTheme.isDark ? FluentTheme.textPrimary : "#000000")
-               : (FluentTheme.isDark ? FluentTheme.textSecondary : "#2B2D31"))
+            : (mouseArea.containsMouse ? FluentTheme.textPrimary : FluentTheme.textSecondary)
 
         onStrokeColorChanged: requestPaint()
 
@@ -130,7 +128,7 @@ Rectangle {
                             radius: FluentTheme.radiusSm
                             color: itemMouse.containsMouse 
                                    ? FluentTheme.bgCardHover 
-                                   : (index === root.currentIndex ? (FluentTheme.isDark ? "#4E2C39" : "#EBEBEB") : "transparent")
+                                   : (index === root.currentIndex ? (FluentTheme.isDark ? "#4E2C39" : "#D8EEFB") : "transparent")
 
                             Text {
                                 text: modelData
