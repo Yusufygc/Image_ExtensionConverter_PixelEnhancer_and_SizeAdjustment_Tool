@@ -7,7 +7,7 @@ Rectangle {
     property bool isDragOver: dropArea.containsDrag
 
     radius: FluentTheme.radiusLg
-    color: isDragOver ? (FluentTheme.isDark ? "#2A3644" : "#EAF4FD") : (mouseArea.containsMouse ? FluentTheme.bgCardHover : FluentTheme.bgCard)
+    color: isDragOver ? (FluentTheme.isDark ? "#2A3548" : "#EAF4FD") : (mouseArea.containsMouse ? FluentTheme.bgCardHover : FluentTheme.bgCard)
     border.color: isDragOver ? FluentTheme.accent : (mouseArea.containsMouse ? FluentTheme.borderHover : FluentTheme.borderSubtle)
     border.width: isDragOver ? 2 : 1
 
@@ -26,7 +26,7 @@ Rectangle {
             width: 56
             height: 56
             radius: 28
-            color: root.isDragOver ? FluentTheme.accent : (FluentTheme.isDark ? "#353535" : "#EBEBEB")
+            color: root.isDragOver ? FluentTheme.accent : (FluentTheme.isDark ? "#341C26" : "#EBEBEB")
             anchors.horizontalCenter: parent.horizontalCenter
 
             Behavior on color {

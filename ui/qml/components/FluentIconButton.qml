@@ -24,7 +24,7 @@ Rectangle {
 
     color: {
         if (!root.enabled) return "transparent"
-        if (active) return FluentTheme.isDark ? "#3A3A3A" : "#E2E2E2"
+        if (active) return FluentTheme.isDark ? "#4E2C39" : "#E2E2E2"
         if (pressed) return FluentTheme.bgCardActive
         if (hovered) return FluentTheme.bgCardHover
         return "transparent"

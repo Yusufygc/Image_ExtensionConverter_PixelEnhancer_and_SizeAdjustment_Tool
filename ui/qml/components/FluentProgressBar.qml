@@ -10,7 +10,7 @@ Rectangle {
     implicitHeight: 6
     implicitWidth: 200
     radius: 3
-    color: FluentTheme.isDark ? "#353535" : "#E5E5E5"
+    color: FluentTheme.isDark ? "#341C26" : "#E5E5E5"
     clip: true
 
     Rectangle {

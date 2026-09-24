@@ -13,7 +13,7 @@ Rectangle {
     radius: FluentTheme.radiusSm
 
     color: isSelected 
-           ? (FluentTheme.isDark ? "#2D3E50" : "#E5F1FB")
+           ? (FluentTheme.isDark ? "#2A3548" : "#E5F1FB")
            : (mouseArea.containsMouse ? FluentTheme.bgCardHover : "transparent")
 
     border.color: isSelected ? FluentTheme.accent : (mouseArea.containsMouse ? FluentTheme.borderSubtle : "transparent")
@@ -62,7 +62,7 @@ Rectangle {
             width: 36
             height: 36
             radius: 4
-            color: FluentTheme.isDark ? "#1E1E1E" : "#EAEAEA"
+            color: FluentTheme.isDark ? "#1C0F13" : "#EAEAEA"
             anchors.verticalCenter: parent.verticalCenter
             clip: true
 
@@ -98,7 +98,7 @@ Rectangle {
                 height: 16
                 width: fmtBadgeText.implicitWidth + 8
                 radius: 3
-                color: FluentTheme.isDark ? "#383838" : "#E2E2E2"
+                color: FluentTheme.isDark ? "#4E2C39" : "#E2E2E2"
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {

@@ -35,8 +35,8 @@ ScrollBar {
     background: Rectangle {
         implicitWidth: 10
         radius: 5
-        color: FluentTheme.isDark ? "#282828" : "#EAEAEA"
-        border.color: FluentTheme.isDark ? "#353535" : "#DADADA"
+        color: FluentTheme.isDark ? "#29161D" : "#EAEAEA"
+        border.color: FluentTheme.isDark ? "#3A2028" : "#DADADA"
         border.width: 1
         opacity: control.size < 1.0 ? (control.hovered || control.pressed ? 0.9 : 0.6) : 0.0
 

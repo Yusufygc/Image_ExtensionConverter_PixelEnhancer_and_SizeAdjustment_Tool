@@ -28,12 +28,16 @@ Inline `setStyleSheet()` kullanılmıyor (istisna: `DropZone`'un sürükleme sı
 
 `utils/svg_colorizer.py` (`get_tinted_icon`, `create_tinted_svg_file`) SVG içindeki `stroke`/`fill` renklerini regex ile tema rengine boyuyor; `ThemeManager.get_themed_icon()` ve `render_qss()`'in `@icon_*` placeholder'ları buradan besleniyor. `create_tinted_svg_file` her çağrıda yeni temp dosya yazmak yerine `(path, color_hex)` anahtarlı bir modül-seviyesi cache kullanıyor — aksi halde her `apply_theme()`/`toggle_theme()` çağrısında (ör. tema butonuna her tıklamada) diskte kalıcı temp dosya birikirdi. Cache `atexit` ile kapanışta temizleniyor. Detay: [[teknoloji-yigini]].
 
-## Spinbox stepper ikonları
+## Spinbox stepper okları
 
-`FluentSpinBox` up/down stepper butonları artık Canvas çizimi yerine `bridge.icons.upArrow` / `bridge.icons.downArrow` (`assets/icons/up-arrow.svg`, `down-arrow.svg`) kullanıyor — hedef format `FluentComboBox`'ındaki chevron ile aynı görsel dil, boyutlandır ve kalite artır sekmelerindeki spinbox'larda da geçerli. Alternatif ikon adayları (`down_arrow_v2.svg`, `up_arrow_v2.svg`) kullanıcı onayı bekliyor, henüz koda bağlı değil.
+`FluentSpinBox` up/down stepper okları `Canvas` ile çiziliyor — `FluentComboBox`'ın hedef format chevron'uyla birebir aynı geometri (12×7, stroke 2.4, aynı path; up aynı path'in dikey aynası). Buton arka plan kutusu/border yok, sadece ok ikonu görünüyor. Stroke rengi `FluentTheme.accent` — tema değişince otomatik güncellenir (`Connections { target: FluentTheme; onIsDarkChanged }` ile `requestPaint()`).
 
 ## Sekme seçili dolgu rengi
 
-`FluentTheme.tabActiveBg` token'ı (dark: `#22384A`, light: `#E3F2FB`) — Dönüştür/Boyutlandır/Kalite Artır ana sekmelerinde (`ControlPanel.qml`) seçili durumun dolgu rengi. Detay: [[tema-sistemi]].
+`FluentTheme.tabActiveBg` token'ı — Dönüştür/Boyutlandır/Kalite Artır ana sekmelerinde (`ControlPanel.qml`) seçili durumun dolgu rengi. Detay: [[tema-sistemi]]#qml-tarafı-ui-qml-fluenttheme-qml.
+
+## Toast konumu
+
+`FluentToast` artık pencerenin üst-orta kısmında (`anchors.top` + `horizontalCenter`), yukarıdan aşağı kayarak beliriyor — eskiden sağ-alt köşedeydi. Bkz. `Main.qml`.
 
 İlgili: [[core-servisleri]], [[teknoloji-yigini]], [[tema-sistemi]]

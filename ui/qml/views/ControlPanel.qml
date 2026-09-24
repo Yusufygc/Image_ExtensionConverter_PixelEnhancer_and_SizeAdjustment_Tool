@@ -215,7 +215,7 @@ Rectangle {
                                     width: (parent.width - 2) / 2
                                     height: parent.height
                                     radius: FluentTheme.radiusSm
-                                    color: bridge.resizeType === 0 ? (FluentTheme.isDark ? "#383838" : "#FFFFFF") : "transparent"
+                                    color: bridge.resizeType === 0 ? (FluentTheme.isDark ? "#4E2C39" : "#FFFFFF") : "transparent"
                                     border.width: bridge.resizeType === 0 ? 1 : 0
                                     border.color: FluentTheme.borderHover
 
@@ -240,7 +240,7 @@ Rectangle {
                                     width: (parent.width - 2) / 2
                                     height: parent.height
                                     radius: FluentTheme.radiusSm
-                                    color: bridge.resizeType === 1 ? (FluentTheme.isDark ? "#383838" : "#FFFFFF") : "transparent"
+                                    color: bridge.resizeType === 1 ? (FluentTheme.isDark ? "#4E2C39" : "#FFFFFF") : "transparent"
                                     border.width: bridge.resizeType === 1 ? 1 : 0
                                     border.color: FluentTheme.borderHover
 

@@ -2,6 +2,17 @@
 
 Kronolojik kayıt defteri. Yeni kayıtlar dosyanın **en üstüne** eklenir. Format: `## [YYYY-AA-GG] [İŞLEM_TİPİ] | Kısa Açıklama`. Navigasyon: [[index]].
 
+## [2026-09-24] FEAT | Dark mod "Snack at Midnight" renk paleti uygulandı, header ikonu ve spinbox kutuları kaldırıldı, toast üst-orta konuma taşındı
+
+- `ui/qml/FluentTheme.qml`: dark mod renkleri kullanıcının verdiği palet görseline göre değiştirildi — bgApp `#0F0807` (Crushed Cacao), bgCard `#432430` (Mulberry Night), textPrimary `#CEB3AB` (Champagne Silk), accent `#E8AC97` (Glace Apricot), tabActiveBg/seçili durum `#2A3548` (Indigo Tart). Light mod dokunulmadı.
+- Palet ile çakışan component-lokal hardcoded gri renkler (`FluentButton`, `FluentIconButton`, `FluentScrollBar`, `FluentProgressBar`, `DropZoneArea`, `FileCardItem`, `FileListItem`, `FluentComboBox`) sıcak tona hizalandı.
+- `ui/qml/Main.qml`: header'daki uygulama ikonu (başlık yanındaki icon) kaldırıldı — sadece metin kaldı.
+- `ui/qml/components/FluentSpinBox.qml`: up/down stepper butonlarının arka plan kutusu/border'ı kaldırıldı, sadece ok ikonları kaldı; ok rengi `FluentTheme.accent` oldu (tema değişince otomatik güncelleniyor).
+- `ui/qml/Main.qml` + `FluentToast.qml`: toast bildirimi sağ-alttan üst-orta konuma taşındı, giriş animasyonu yukarıdan aşağı kaymaya çevrildi.
+- Önceki `down_arrow_v2.svg`/`up_arrow_v2.svg` aday dosyaları (kullanılmadı) silindi.
+
+İlgili: [[tema-sistemi]], [[arayuz-katmani]]
+
 ## [2026-09-24] INGEST | Uygulama ikonu (icon.ico) için alternatif aday oluşturuldu
 
 Kullanıcı önceki "iconu beğenmedim" mesajının ok ikonları değil `assets/icons/icon.ico` (uygulama/taskbar ikonu, `AppIcons.APP`) için olduğunu belirtti. Mevcut `icon.ico` (64x64, düz mavi, jenerik stok görünüm) yerine Fluent üslubuna uyan aday üretildi:

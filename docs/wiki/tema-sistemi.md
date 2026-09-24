@@ -25,6 +25,12 @@ Yeni ikonlar: `assets/icons/sun.svg`, `moon.svg` — `AppIcons.THEME_SUN`/`THEME
 
 Mevcut ikonların çoğu (`info_icon.svg`, `delete_icon.svg` vb.) stroke rengi SVG içine sabit hardcoded — temaya göre otomatik renk değiştirmiyor. Bu, SVG recolor (runtime'da `QPainter` ile yeniden boyama) gerektirir; kapsam dışı bırakıldı, mevcut renkler her iki temada da okunabilir kabul edildi.
 
+## QML tarafı: `ui/qml/FluentTheme.qml`
+
+Yukarıdaki `ui/styles/theme.py` + `tokens.py` + `main.qss` zinciri eski QtWidgets arayüzüne (`ui/main_window.py`) ait — [[arayuz-katmani]]'nde belirtildiği gibi geriye dönük referans olarak duruyor, artık kullanılmıyor. Güncel QML arayüzü (`ui/qml/`) kendi tema kaynağını kullanıyor: `ui/qml/FluentTheme.qml`, `pragma Singleton` ile tekil QtObject, `isDark` bool'una göre `bgApp/bgCard/textPrimary/accent/...` renklerini ternary ile döndürüyor. `Main.qml` bunu `bridge.currentTheme`'e göre günceller.
+
+**Dark mod paleti — "Snack at Midnight":** kullanıcı isteğiyle 2026-09-24'te uygulanan dark tema rengi: Mulberry Night `#432430` (kart/panel yüzeyleri), Champagne Silk `#CEB3AB` (birincil metin), Indigo Tart `#2A3548` (seçili sekme/dosya vurgusu — sıcak zemine soğuk kontrast), Glace Apricot `#E8AC97` (accent — buton/ilerleme/odak rengi), Crushed Cacao `#0F0807` (en dış app arka planı). Light mod paleti değişmedi. Detay ve tüm token eşlemesi `ui/qml/FluentTheme.qml` içinde. Bu paletle çakışan, `FluentTheme` token'larını bypass eden component-lokal hardcoded gri renkler (`FluentButton`, `FluentIconButton`, `FluentScrollBar`, `FluentProgressBar`, `DropZoneArea`, `FileCardItem`, `FileListItem`, `FluentComboBox`) aynı geçişte sıcak palete hizalandı.
+
 ## Yeni token eklerken
 
 `main.qss`'e yeni bir renk gerektiğinde: önce `tokens.py`'deki her iki dict'e de aynı anahtarı ekle, sonra QSS'te `@color_<anahtar>` kullan. Sadece `DARK_TOKENS`'e eklenip `LIGHT_TOKENS`'i unutursan test kırılır (kasıtlı guard). Bkz. [[RULES]]#kod-kuralları.

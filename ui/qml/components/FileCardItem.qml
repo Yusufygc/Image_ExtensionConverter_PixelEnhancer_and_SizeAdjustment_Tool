@@ -13,7 +13,7 @@ Rectangle {
     radius: FluentTheme.radiusMd
 
     color: isSelected 
-           ? (FluentTheme.isDark ? "#2D3E50" : "#E5F1FB")
+           ? (FluentTheme.isDark ? "#2A3548" : "#E5F1FB")
            : (mouseArea.containsMouse ? FluentTheme.bgCardHover : FluentTheme.bgCard)
 
     border.color: isSelected 
@@ -38,7 +38,7 @@ Rectangle {
             width: parent.width
             height: 90
             radius: FluentTheme.radiusSm
-            color: FluentTheme.isDark ? "#1C1C1C" : "#EEEEEE"
+            color: FluentTheme.isDark ? "#1C0F13" : "#EEEEEE"
             clip: true
 
             Image {

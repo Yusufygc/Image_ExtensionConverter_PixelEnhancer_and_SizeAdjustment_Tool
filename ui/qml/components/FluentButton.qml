@@ -24,7 +24,7 @@ Rectangle {
     // Color logic based on variant
     color: {
         if (!root.enabled) {
-            return FluentTheme.isDark ? "#282828" : "#E8E8E8"
+            return FluentTheme.isDark ? "#29161D" : "#E8E8E8"
         }
         if (variant === "primary") {
             if (pressed) return FluentTheme.accentActive
