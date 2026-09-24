@@ -2,6 +2,10 @@
 
 Kronolojik kayıt defteri. Yeni kayıtlar dosyanın **en üstüne** eklenir. Format: `## [YYYY-AA-GG] [İŞLEM_TİPİ] | Kısa Açıklama`. Navigasyon: [[index]].
 
+## [2026-09-24] REVIEW | Toast/tema commit'lerinin denetimi, 8 bulgu çözüldü + önizleme büyütüldü
+
+`AI-Gelistirme-Metodolojisi.md`ye göre yapılan code review'da, wiki'ye hiç işlenmemiş 2 commit'te (toast bildirimi, arayüz hizalamaları) 8 bulgu tespit edilip çözüldü: `utils/svg_colorizer.py`'de her `apply_theme()` çağrısında sızan/tekrar üretilen temp SVG dosyaları için `(path, color_hex)` cache'i eklendi (kritik); `main_window.py`, `drop_zone.py`, `toast.py`'deki literal string ve inline `setStyleSheet()` ihlalleri `UIStrings`/`main.qss`'e taşındı; kullanılmayan `set_app_instance()` silindi; `file_list_item.py`'deki duplicate import'lar ve sessizce yutulan `except Exception` blokları (artık `logging.warning`) düzeltildi. Ayrıca kullanıcı isteğiyle dosya listesi önizleme thumbnail'ı büyütüldü (48px -> 96px, `AppConstants.FILE_ITEM_THUMB_SIZE` vb. sabitlere taşındı). `pytest` (14/14) her adımdan sonra doğrulandı. Detay: [[arayuz-katmani]].
+
 ## [2026-07-08] FEAT | Token tabanlı dark/light tema sistemi + toggle buton
 
 `ui/styles/tokens.py`'ye `DARK_TOKENS` (Catppuccin Mocha) / `LIGHT_TOKENS` (Catppuccin Latte) eklendi; `assets/style/main.qss`'teki tüm literal renkler `@color_*` placeholder'larına çevrildi. `ThemeManager`'a saf `render_qss()`, `apply_theme(theme=None)`, `toggle_theme()` eklendi; tema tercihi `QSettings` ile kalıcı, ilk açılış varsayılanı `light`. Header'daki dengeleme amaçlı boş `dummy_btn` yerine gerçek `btn_theme_toggle` (sol üst, sun/moon ikonlu) geldi. `tests/test_theme.py` ile token anahtar eşitliği ve placeholder temizliği garanti altına alındı. QML'e geçiş ayrıca tartışıldı, kapsam dışı bırakıldı (mevcut ölçek için gerekçe yetersiz). Detay: [[tema-sistemi]].
