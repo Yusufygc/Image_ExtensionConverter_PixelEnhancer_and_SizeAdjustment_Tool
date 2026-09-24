@@ -2,6 +2,15 @@
 
 Kronolojik kayıt defteri. Yeni kayıtlar dosyanın **en üstüne** eklenir. Format: `## [YYYY-AA-GG] [İŞLEM_TİPİ] | Kısa Açıklama`. Navigasyon: [[index]].
 
+## [2026-09-24] FIX | Kayıp Inno Setup script'i (`Documents/deneme.iss`) geri getirildi, exe + kurulum sihirbazı üretildi
+
+- `Documents/deneme.iss` `c2b6c40` commit'inde (tema sistemi geçişi) yanlışlıkla silinmiş — wiki'de referansı vardı ama dosya repoda yoktu. `c2b6c40~1`'den geri getirilip güncel `--onefile` build'e göre güncellendi (`Conventor.exe`, `main.dist`/`assets` kopyalama adımları kaldırıldı, `DefaultDirName={autopf}\Conventor`, `desktopicon` task'ı varsayılan işaretli).
+- `build.bat`'taki PyInstaller komutu çalıştırıldı → `dist/Conventor.exe`.
+- Inno Setup (`ISCC.exe`) ile derlendi → `dist/installer/ConventorSetup.exe`. Program Files'a kurar, masaüstü kısayolu varsayılan olarak oluşturur.
+- `dist/`, `build/` `.gitignore`'da — derlenmiş dosyalar commit'lenmedi, sadece `Documents/deneme.iss` kaynak script'i versiyonlandı.
+
+İlgili: [[build-ve-dagitim]]
+
 ## [2026-09-24] FEAT | Light mod "Aqua Nebula" renk paleti uygulandı
 
 - `ui/qml/FluentTheme.qml`: light mod renkleri kullanıcının verdiği palete göre değiştirildi — bgApp `#DEF2FF`, textPrimary Midnight Abyss `#061826`, textSecondary Atlantic Steel `#1C4E75`, accent Tidepool Teal `#2FA0C6`, accentHover Summer Surf `#58C9F3`, tabActiveBg/seçili durum Glacier Mist `#BDE5FF`. Dark mod dokunulmadı.

@@ -10,6 +10,8 @@ PyInstaller ile `--onefile` derleme: `python -m PyInstaller --noconfirm --onefil
 
 Inno Setup script'i. `.gitignore`'daki `/Documents/*` kuralına istisna tanımlanarak (`!/Documents/deneme.iss`) versiyonlanıyor — klasördeki diğer kişisel notlar (`plan.txt`, `sanalortamkurulum.txt`) repo dışı kalmaya devam ediyor. Script içindeki tüm yollar `{#SourcePath}` göreli referanslarıyla yazılı (eskiden geliştirici makinesine özel `D:\...`, `C:\ikonlar\...` mutlak yolları vardı, kaldırıldı) — başka bir makinede doğrudan çalıştırılabilir. Setup ikonu repodaki `assets/icons/icon.ico`'yu kullanıyor.
 
+**2026-09-24 güncellemesi:** dosya `c2b6c40` commit'inde (tema sistemi geçişi) yanlışlıkla silinmiş, `docs/wiki`'de referansı kalmıştı ama repoda yoktu — eski `c2b6c40~1` versiyonundan geri getirilip QML/PyInstaller `--onefile` geçişine göre güncellendi: `MyAppExeName` artık `Conventor.exe` (eskiden `main.exe` + `main.dist/*` — `--onedir` yapısı), `[Files]` bölümünden `main.dist` ve `assets` kopyalama adımları kaldırıldı (onefile exe kaynakları kendi içine gömüyor, `sys._MEIPASS` ile açıyor). `DefaultDirName={autopf}\Conventor` → Program Files'a kurar. `desktopicon` task'ı artık varsayılan işaretli (`Flags: unchecked` kaldırıldı) — kurulum sihirbazında masaüstü kısayolu kutucuğu açık geliyor. Çıktı: `dist/installer/ConventorSetup.exe`.
+
 ## Repo hijyeni: derlenmiş ikili dosyalar
 
 `*.exe` ve `*.msi` `.gitignore`'da. Daha önce yanlışlıkla commit'lenmiş `ConverterApp.exe`, `git filter-repo` ile **tüm commit geçmişinden** temizlendi ve `origin/main`'e force-push edildi (rewrite öncesi tam repo yedeği alındı). Kural: derlenmiş ikili dosyalar asla commit'lenmez, dağıtım GitHub Releases üzerinden yapılır. Bkz. [[RULES]]#commit-kuralları.
