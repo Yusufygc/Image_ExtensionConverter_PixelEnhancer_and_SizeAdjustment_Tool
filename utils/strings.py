@@ -13,6 +13,9 @@ class UIStrings:
     OP_LABEL_CONVERT = "Format Dönüştür"
     OP_LABEL_RESIZE = "Yeniden Boyutlandırma"
     OP_LABEL_ENHANCE = "Kalite/Çözünürlük Artır"
+    OP_TAB_CONVERT = "Dönüştür"
+    OP_TAB_RESIZE = "Boyutlandır"
+    OP_TAB_ENHANCE = "Kalite Artır"
     LBL_TARGET_FORMAT = "Hedef Format:"
     LBL_RESIZE_METHOD = "Yöntem:"
     RESIZE_METHOD_DIMENSIONS = "Boyut (px)"
@@ -33,8 +36,31 @@ class UIStrings:
     DIALOG_IMAGE_FILTER = "Resim Dosyaları (*.png *.jpg *.jpeg *.bmp *.webp *.ico *.tiff *.svg)"
     DIALOG_SELECT_OUTPUT_FOLDER_TITLE = "Hedef Klasör Seç"
 
+    # --- Araç Çubuğu ve Aksiyon Butonları ---
+    BTN_DELETE_SELECTED = "Seçilenleri Sil"
+    BTN_CLEAR_ALL = "Tümünü Temizle"
+    BTN_SELECT_ALL = "Tümünü Seç"
+    BTN_OPEN_OUTPUT_FOLDER = "Klasörü Aç"
+    TOOLTIP_SORT = "Dosyaları Sırala"
+    TOOLTIP_VIEW_GRID = "Kart Görünümü"
+    TOOLTIP_VIEW_LIST = "Liste Görünümü"
+    TOOLTIP_OPEN_OUTPUT_FOLDER = "Hedef klasörü Windows Gezgini'nde aç"
+    TOOLTIP_ADD_FILES = "Yeni resim dosyaları ekle"
+
+    # --- Sıralama Seçenekleri ---
+    SORT_NAME_ASC = "Ada Göre (A-Z)"
+    SORT_NAME_DESC = "Ada Göre (Z-A)"
+    SORT_SIZE_ASC = "Boyuta Göre (Küçük-Büyük)"
+    SORT_SIZE_DESC = "Boyuta Göre (Büyük-Küçük)"
+    SORT_STATUS = "Duruma Göre"
+
+    # --- Dosya Sayacı ---
+    LBL_FILE_COUNT = "{count} dosya"
+    LBL_SELECTED_COUNT = "({selected} seçili)"
+
     # --- Durum çubuğu / işlem sonucu ---
     STATUS_READY = "Hazır"
+    STATUS_PROCESSING = "İşleniyor..."
     STATUS_COMPLETED = "İşlem Tamamlandı!"
     STATUS_ERROR_GENERIC = "Hata oluştu."
     STATUS_PARTIAL_ERROR_TEMPLATE = "{count} dosyada hata oluştu."
@@ -43,28 +69,31 @@ class UIStrings:
     MSG_PARTIAL_ERROR_TITLE = "Kısmi Hata"
     MSG_PARTIAL_ERROR_BODY_PREFIX = "Bazı dosyalar işlenemedi:\n\n"
     MSG_SUCCESS_TITLE = "Başarılı"
-    MSG_SUCCESS_BODY = "Tüm işlemler tamamlandı."
+    MSG_SUCCESS_BODY = "Tüm işlemler başarıyla tamamlandı."
     MSG_ERROR_TITLE = "Hata"
 
-    # --- İkon bulunamazsa gösterilecek metin/emoji fallback'leri ---
+    # --- İkon bulunamazsa gösterilecek metin fallback'leri (Emoji YOK) ---
     FALLBACK_INFO = "?"
-    FALLBACK_BACK = "<-"
-    FALLBACK_FOLDER = "📂"
+    FALLBACK_BACK = "<"
+    FALLBACK_FOLDER = "Klasör"
     FALLBACK_REMOVE = "X"
-    FALLBACK_THUMB_FILE = "📄"
+    FALLBACK_THUMB_FILE = "Resim"
     FALLBACK_THUMB_UNKNOWN = "?"
-    FALLBACK_THEME_SUN = "☀️"
-    FALLBACK_THEME_MOON = "🌙"
+    FALLBACK_THEME_SUN = "Açık"
+    FALLBACK_THEME_MOON = "Koyu"
 
-    # --- Dosya listesi öğesi: işlem durumu rozeti ---
-    FILE_STATUS_PROCESSING = "⏳"
-    FILE_STATUS_SUCCESS = "✅"
-    FILE_STATUS_ERROR = "❌"
+    # --- Dosya listesi öğesi: işlem durumu metinleri (Emoji YOK) ---
+    FILE_STATUS_PROCESSING = "İşleniyor"
+    FILE_STATUS_SUCCESS = "Tamamlandı"
+    FILE_STATUS_ERROR = "Hata"
 
-    # --- DropZone durum metinleri ---
-    DROPZONE_DEFAULT_TEXT = "Resimleri Buraya Sürükleyin\nveya\nTıklayın"
-    DROPZONE_DRAG_TEXT = "Bırak Gelsin! 📂"
-    DROPZONE_UNSUPPORTED_TEXT = "Desteklenmeyen dosya türü ⚠️"
+    # --- DropZone durum metinleri (Emoji YOK) ---
+    DROPZONE_DEFAULT_TEXT = "Resimleri Buraya Sürükleyin\nveya Tıklayın"
+    DROPZONE_DEFAULT_TITLE = "Resimleri Buraya Sürükleyin"
+    DROPZONE_DEFAULT_SUB = "veya göz atmak için tıklayın"
+    DROPZONE_DRAG_TEXT = "Bırakın"
+    DROPZONE_DRAG_ACTIVE = "Dosyaları buraya bırakın"
+    DROPZONE_UNSUPPORTED_TEXT = "Desteklenmeyen dosya türü"
 
     # --- Tooltip'ler ---
     TOOLTIP_INFO = "Uygulama hakkında bilgi"
@@ -72,7 +101,7 @@ class UIStrings:
     TOOLTIP_THEME_TOGGLE_TO_DARK = "Koyu temaya geç"
     TOOLTIP_OUTPUT_SELECT = "Hedef klasör seç"
     TOOLTIP_REMOVE_FILE = "Listeden kaldır"
-    TOOLTIP_DROPZONE = "Resim dosyalarını buraya sürükleyip bırakın veya tıklayarak seçin (Ctrl+O)"
+    TOOLTIP_DROPZONE = "Resim dosyalarını buraya sürükleyip bırakın veya tıklayarak seçin"
 
     # --- Worker (arka plan işlem) mesaj şablonları ---
     WORKER_PROGRESS_TEMPLATE = "İşleniyor: {file}..."

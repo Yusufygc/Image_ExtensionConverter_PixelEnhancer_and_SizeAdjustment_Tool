@@ -37,6 +37,13 @@ class AppIcons:
     UP_ARROW = "assets/icons/up-arrow.svg"
     THEME_SUN = "assets/icons/sun.svg"
     THEME_MOON = "assets/icons/moon.svg"
+    CHECK = "assets/icons/check_icon.svg"
+    ERROR = "assets/icons/error_icon.svg"
+    SORT = "assets/icons/sort_icon.svg"
+    GRID = "assets/icons/grid_icon.svg"
+    LIST = "assets/icons/list_icon.svg"
+    OPEN_FOLDER = "assets/icons/open_folder_icon.svg"
+    TRASH = "assets/icons/trash_icon.svg"
     MAIN_QSS = "assets/style/main.qss"
 
 

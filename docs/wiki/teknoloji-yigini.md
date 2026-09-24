@@ -7,8 +7,7 @@
 
 ## Build bağımlılıkları (`requirements-build.txt`, ayrı — runtime'a karışmıyor)
 
-- **Nuitka** — Python'ı native exe'ye derleyen derleyici. Bkz. [[build-ve-dagitim]].
-- **zstandard** — Nuitka'nın sıkıştırma bağımlılığı.
+- **PyInstaller** — Python uygulamasını tek dosya bağımsız exe'ye paketleyen araç. Bkz. [[build-ve-dagitim]].
 
 ## Geliştirme bağımlılıkları (`requirements-dev.txt`)
 
@@ -16,7 +15,7 @@
 
 ## Logging
 
-`utils/logger.py` → `setup_logging()`, `main.py` başında çağrılıyor. `%TEMP%/converter.log`'a yazıyor. Neden dosyaya (konsola değil): `build.bat`'taki Nuitka derlemesi `--windows-console-mode=disable` kullanıyor, yani paketlenmiş exe'de konsol yok — `print()` çıktısı hiçbir yere gitmezdi. `utils/path_helper.py` ve `ui/styles/theme.py`'deki hata/uyarı durumları `logging.exception()` / `logging.warning()` kullanıyor, `print()` değil.
+`utils/logger.py` → `setup_logging()`, `main.py` başında çağrılıyor. `%TEMP%/converter.log`'a yazıyor. Neden dosyaya (konsola değil): `build.bat`'taki paketleme `--windowed` (konsolsuz) kullanıyor, yani paketlenmiş exe'de konsol yok — `print()` çıktısı hiçbir yere gitmezdi. `utils/path_helper.py` ve `ui/bridge.py`'deki hata/uyarı durumları `logging.exception()` / `logging.warning()` kullanıyor, `print()` değil.
 
 ## Sürüm yönetimi kuralı
 

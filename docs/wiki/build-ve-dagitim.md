@@ -2,9 +2,9 @@
 
 ## `build.bat`
 
-Nuitka ile `--onefile` derleme: `python -m nuitka --onefile --enable-plugin=pyside6 --windows-console-mode=disable --windows-icon-from-ico=assets/icons/icon.ico --include-data-dir=assets=assets --main=main.py`. Çıktı: `dist/main.exe`. Nuitka/zstandard kurulu değilse `requirements-build.txt`'ten kurulur (bkz. [[teknoloji-yigini]]).
+PyInstaller ile `--onefile` derleme: `python -m PyInstaller --noconfirm --onefile --windowed --icon=assets/icons/icon.ico --name=Conventor --add-data "assets;assets" --add-data "ui/qml;ui/qml" --hidden-import=PIL --hidden-import=PySide6.QtQuick --hidden-import=PySide6.QtQml --hidden-import=PySide6.QtSvg main.py`. Çıktı: `dist/Conventor.exe`. PyInstaller kurulu değilse `requirements-build.txt`'ten kurulur (bkz. [[teknoloji-yigini]]).
 
-`--windows-console-mode=disable` önemli bir kısıt: paketlenmiş exe'nin konsolu yok, bu yüzden hata ayıklama `print()` ile değil dosyaya loglama ile yapılıyor (bkz. [[teknoloji-yigini]]#logging).
+`--windowed` ile konsol penceresi açılmaz; hata ayıklama dosyaya loglama ile yapılır (bkz. [[teknoloji-yigini]]#logging). Kaynak yolları `utils/path_helper.py` içindeki `sys._MEIPASS` çözümlemesi ile tek dosya açılım dizininden yüklenir.
 
 ## Kurulum sihirbazı (`Documents/deneme.iss`)
 

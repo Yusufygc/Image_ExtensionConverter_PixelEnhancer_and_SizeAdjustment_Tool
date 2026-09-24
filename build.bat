@@ -1,35 +1,34 @@
 @echo off
 echo ==========================================
-echo Conventor Build Script (Nuitka)
+echo Conventor Build Script (PyInstaller)
 echo ==========================================
 echo.
 
-REM Check if Nuitka is installed
-python -c "import nuitka" 2>NUL
+REM Check if PyInstaller is installed
+python -c "import PyInstaller" 2>NUL
 if %errorlevel% neq 0 (
-    echo Nuitka is not installed. Installing...
+    echo PyInstaller is not installed. Installing...
     pip install -r requirements-build.txt
 )
 
 echo Cleaning previous builds...
 rmdir /s /q build 2>NUL
 rmdir /s /q dist 2>NUL
-rmdir /s /q Conventor.dist 2>NUL
-rmdir /s /q Conventor.build 2>NUL
+del /f /q Conventor.spec 2>NUL
+del /f /q main.spec 2>NUL
 
 echo.
-echo Building executable...
-echo This might take a few minutes...
+echo Building executable with PyInstaller...
+echo This might take a few moments...
 echo.
 
-REM --onefile: Creates a single executable file (slower startup, easier distribution)
-python -m nuitka --onefile --enable-plugin=pyside6 --windows-console-mode=disable --windows-icon-from-ico=assets/icons/icon.ico --include-data-dir=assets=assets --include-module=PIL --include-module=core.converter --include-module=core.enhancer --include-module=core.resizer --output-dir=dist --main=main.py
+python -m PyInstaller --noconfirm --onefile --windowed --icon=assets/icons/icon.ico --name=Conventor --add-data "assets;assets" --add-data "ui/qml;ui/qml" --hidden-import=PIL --hidden-import=PySide6.QtQuick --hidden-import=PySide6.QtQml --hidden-import=PySide6.QtSvg main.py
 
 if %errorlevel% equ 0 (
     echo.
     echo ==========================================
     echo Build SUCCESSFUL!
-    echo Executable is located in: dist\main.exe
+    echo Executable is located in: dist\Conventor.exe
     echo You can move this file anywhere and run it.
     echo ==========================================
 ) else (

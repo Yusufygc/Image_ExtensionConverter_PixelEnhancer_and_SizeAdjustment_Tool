@@ -2,15 +2,19 @@
 
 `ui/` PySide6 üzerine kurulu. Üst bağlam: [[mimari]].
 
-## Dosyalar
+## Dosyalar ve Bileşenler
 
-- **`main_window.py`** — `MainWindow`. `setup_ui()` iki sayfalı bir `QStackedWidget` kurar (Ana sayfa / Bilgi sayfası). Ana sayfa kurulumu builder metotlarına bölünmüş: `_build_file_selection_group()`, `_build_operation_group()`, `_build_option_widgets()`, `_build_output_folder_selector()`, `_build_progress_section()`. Operasyon seçimi registry pattern kullanıyor (bkz. [[mimari]]#operasyon-seçimi-registry-pattern).
+- **`bridge.py`** — `AppBridge` (QObject). QML ile backend ve worker arasındaki MVVM köprüsü. Dosya listesi, operasyon ayarları, sıralama, çoklu seçim ve tema durumunu `Q_PROPERTY` ve sinyallerle yönetir.
+- **`qml/`** — Windows 11 Fluent Split-View arayüzü:
+  - `Main.qml`: Ana pencere kabuğu (`ApplicationWindow`).
+  - `FluentTheme.qml`: Windows 11 Fluent renk token'ları (Dark & Light) ve tipografi.
+  - `views/FilesPanel.qml`: Sol panel (DropZone, Grid/Liste görünümleri, sıralama, toplu silme, çoklu seçim).
+  - `views/ControlPanel.qml`: Sağ panel (İşlem sekmeleri, dinamik parametreler, hedef klasör + tek tıkla klasörü açma, progress bar ve başlat butonu).
+  - `views/AboutModal.qml`: Bilgi ve yardım modalı.
+  - `components/`: `FluentCard`, `FluentButton`, `FluentIconButton`, `FluentComboBox`, `FluentSpinBox`, `FluentProgressBar`, `FluentToast`, `LoadingSpinner`, `DropZoneArea`, `FileCardItem`, `FileListItem`.
 - **`worker.py`** — `ProcessingWorker` (QThread) + `WorkerSignals`. Bkz. [[mimari]]#thread-modeli.
+- **`main_window.py`** — Eski QtWidgets tabanlı `MainWindow` (geriye dönük referans olarak muhafaza edildi).
 - **`styles/theme.py`** — `ThemeManager`, token tabanlı dark/light tema motoru. Detay: [[tema-sistemi]].
-- **`views/info_view.py`** — statik bilgi sayfası, tüm metni `UIStrings.INFO_HTML_CONTENT`'ten alıyor.
-- **`widgets/drop_zone.py`** — `DropZone` (QFrame). Sürükle-bırak sırasında `AppConstants.SUPPORTED_EXTENSIONS` ile dosya uzantısı filtreleniyor; desteklenmeyen dosya bırakılırsa kısa süreli uyarı metni gösterip (`QTimer.singleShot`) varsayılan metne dönüyor.
-- **`widgets/file_list_item.py`** — `FileListItemWidget`. Küçük resim önizlemesi `QImageReader.setScaledSize()` ile hedef boyutta decode ediliyor (tam çözünürlükte yükleyip küçültmek yerine — büyük dosyalarda gereksiz bellek/CPU kullanımını önlüyor). Önizleme boyutu `AppConstants.FILE_ITEM_THUMB_SIZE` (96px) / `FILE_ITEM_THUMB_FALLBACK_ICON_SIZE` (64px) / `FILE_ITEM_ROW_HEIGHT` (116px) sabitlerinden geliyor; liste satır yüksekliği (`main_window.py`'de `item.setSizeHint`) bu sabitle senkron tutulmalı.
-- **`widgets/toast.py`** — `ToastNotification` (frameless, `WA_TranslucentBackground` + `WindowStaysOnTopHint` geçici QWidget). `QGraphicsOpacityEffect` ile fade-in/fade-out, `QTimer.singleShot` ile otomatik kapanış. Stili `QLabel#ToastLabel` seçicisiyle `main.qss`'te — inline `setStyleSheet()` yok.
 
 ## Merkezi ikon/string yapısı
 
@@ -23,5 +27,13 @@ Inline `setStyleSheet()` kullanılmıyor (istisna: `DropZone`'un sürükleme sı
 ## Tema ikonları — SVG renklendirme
 
 `utils/svg_colorizer.py` (`get_tinted_icon`, `create_tinted_svg_file`) SVG içindeki `stroke`/`fill` renklerini regex ile tema rengine boyuyor; `ThemeManager.get_themed_icon()` ve `render_qss()`'in `@icon_*` placeholder'ları buradan besleniyor. `create_tinted_svg_file` her çağrıda yeni temp dosya yazmak yerine `(path, color_hex)` anahtarlı bir modül-seviyesi cache kullanıyor — aksi halde her `apply_theme()`/`toggle_theme()` çağrısında (ör. tema butonuna her tıklamada) diskte kalıcı temp dosya birikirdi. Cache `atexit` ile kapanışta temizleniyor. Detay: [[teknoloji-yigini]].
+
+## Spinbox stepper ikonları
+
+`FluentSpinBox` up/down stepper butonları artık Canvas çizimi yerine `bridge.icons.upArrow` / `bridge.icons.downArrow` (`assets/icons/up-arrow.svg`, `down-arrow.svg`) kullanıyor — hedef format `FluentComboBox`'ındaki chevron ile aynı görsel dil, boyutlandır ve kalite artır sekmelerindeki spinbox'larda da geçerli. Alternatif ikon adayları (`down_arrow_v2.svg`, `up_arrow_v2.svg`) kullanıcı onayı bekliyor, henüz koda bağlı değil.
+
+## Sekme seçili dolgu rengi
+
+`FluentTheme.tabActiveBg` token'ı (dark: `#22384A`, light: `#E3F2FB`) — Dönüştür/Boyutlandır/Kalite Artır ana sekmelerinde (`ControlPanel.qml`) seçili durumun dolgu rengi. Detay: [[tema-sistemi]].
 
 İlgili: [[core-servisleri]], [[teknoloji-yigini]], [[tema-sistemi]]

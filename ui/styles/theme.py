@@ -78,6 +78,17 @@ class ThemeManager:
             logger.exception("Error applying theme")
 
     @staticmethod
+    def get_persisted_theme() -> str:
+        theme = ThemeManager._settings().value(SETTINGS_KEY_THEME, DEFAULT_THEME)
+        return theme if theme in THEMES else DEFAULT_THEME
+
+    @staticmethod
+    def save_theme(theme: str):
+        if theme in THEMES:
+            ThemeManager.current_theme = theme
+            ThemeManager._settings().setValue(SETTINGS_KEY_THEME, theme)
+
+    @staticmethod
     def toggle_theme(app: QApplication) -> str:
         """Flips light<->dark, applies it, and returns the new theme name."""
         new_theme = "light" if ThemeManager.current_theme == "dark" else "dark"

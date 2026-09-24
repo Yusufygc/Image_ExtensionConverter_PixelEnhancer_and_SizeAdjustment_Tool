@@ -52,12 +52,12 @@ Eğer kaynak kod üzerinden çalışmak veya geliştirme yapmak istiyorsanız:
 
 ## 📦 Kaynak Koddan Modüler EXE Oluşturma (Build)
 
-Uygulamayı kendiniz derlemek isterseniz **Nuitka** kullanabilirsiniz:
+Uygulamayı kendiniz derlemek isterseniz **PyInstaller** kullanabilirsiniz:
 
 1.  `build.bat` dosyasını çalıştırın.
-2.  İşlem bittiğinde `dist/main.exe` dosyası oluşturulacaktır.
+2.  İşlem bittiğinde `dist/Conventor.exe` dosyası oluşturulacaktır.
 
-**Not:** Derleme işlemi sırasında `assets`, `core`, `ui` gibi gerekli modüller ve veri dosyaları exe içerisine gömülür.
+**Not:** Derleme işlemi sırasında `assets`, `ui/qml` gibi gerekli veri dosyaları ve modüller exe içerisine gömülür.
 
 ## 📂 Proje Yapısı
 
