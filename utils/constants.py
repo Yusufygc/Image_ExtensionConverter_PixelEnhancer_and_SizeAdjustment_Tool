@@ -2,7 +2,7 @@ class AppConstants:
     APP_NAME = "Uzantı Dönüştürücü ve Piksel Artırıcı"
     VERSION = "1.0.0"
     WINDOW_WIDTH = 1000
-    WINDOW_HEIGHT = 780
+    WINDOW_HEIGHT = 680
     
     # Desteklenen Formatlar
     SUPPORTED_FORMATS = [
@@ -18,6 +18,11 @@ class AppConstants:
     DEFAULT_QUALITY = 90
     ENHANCED_QUALITY = 95
     DEFAULT_OUTPUT_FOLDER = "Converted_Images"
+
+    # Dosya listesi öğesi: küçük resim önizleme boyutları
+    FILE_ITEM_THUMB_SIZE = 96
+    FILE_ITEM_THUMB_FALLBACK_ICON_SIZE = 64
+    FILE_ITEM_ROW_HEIGHT = 116
 
 
 class AppIcons:

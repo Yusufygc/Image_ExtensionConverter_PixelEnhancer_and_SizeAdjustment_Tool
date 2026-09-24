@@ -24,6 +24,9 @@ class UIStrings:
     LBL_TARGET_FOLDER = "Hedef Klasör:"
     OUTPUT_PLACEHOLDER = "Varsayılan (Kaynak Klasör)"
     BTN_PROCESS = "İŞLEMİ BAŞLAT"
+    BTN_NEXT_STEP = "İleri ->"
+    BTN_PREV_STEP = "<- Geri"
+    TOAST_NO_FILES_SELECTED = "Lütfen önce dönüştürülecek dosyaları ekleyin."
 
     # --- Dosya diyalogları ---
     DIALOG_SELECT_IMAGES_TITLE = "Resim Seç"

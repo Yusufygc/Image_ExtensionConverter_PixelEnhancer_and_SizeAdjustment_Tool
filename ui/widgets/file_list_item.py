@@ -2,12 +2,16 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtGui import QPixmap, QImageReader, QIcon
 from utils.path_helper import get_resource_path, get_icon
-from utils.constants import AppIcons
+from utils.constants import AppIcons, AppConstants
 from utils.strings import UIStrings
 from ui.styles.theme import ThemeManager
 import os
-from utils.strings import UIStrings
-import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+THUMB_SIZE = AppConstants.FILE_ITEM_THUMB_SIZE
+THUMB_FALLBACK_ICON_SIZE = AppConstants.FILE_ITEM_THUMB_FALLBACK_ICON_SIZE
 
 class FileListItemWidget(QWidget):
     remove_clicked = Signal(str) # Emits file path to remove
@@ -25,7 +29,7 @@ class FileListItemWidget(QWidget):
         # Thumbnail
         self.thumb_label = QLabel()
         self.thumb_label.setObjectName("ThumbLabel")
-        self.thumb_label.setFixedSize(48, 48)
+        self.thumb_label.setFixedSize(THUMB_SIZE, THUMB_SIZE)
         self.thumb_label.setAlignment(Qt.AlignCenter)
         
         self.load_thumbnail()
@@ -49,7 +53,8 @@ class FileListItemWidget(QWidget):
             info_layout.addWidget(self.name_label)
             info_layout.addWidget(self.size_label)
             info_layout.addStretch()
-        except Exception:
+        except OSError:
+            logger.warning("Dosya boyutu okunamadı: %s", self.file_path)
             self.name_label = QLabel(os.path.basename(self.file_path))
             self.name_label.setObjectName("FileNameLabel")
             info_layout.addWidget(self.name_label)
@@ -95,7 +100,7 @@ class FileListItemWidget(QWidget):
                 reader = QImageReader(self.file_path)
                 original_size = reader.size()
                 if original_size.isValid():
-                    reader.setScaledSize(original_size.scaled(40, 40, Qt.KeepAspectRatio))
+                    reader.setScaledSize(original_size.scaled(THUMB_SIZE, THUMB_SIZE, Qt.KeepAspectRatio))
                 image = reader.read()
                 if not image.isNull():
                     self.thumb_label.setPixmap(QPixmap.fromImage(image))
@@ -104,11 +109,12 @@ class FileListItemWidget(QWidget):
             # Fallback icon
             fallback_path = get_resource_path(AppIcons.FILE)
             if os.path.exists(fallback_path) and os.path.getsize(fallback_path) > 0:
-                 self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(28, 28, Qt.KeepAspectRatio))
+                 self.thumb_label.setPixmap(QPixmap(fallback_path).scaled(THUMB_FALLBACK_ICON_SIZE, THUMB_FALLBACK_ICON_SIZE, Qt.KeepAspectRatio))
             else:
                  self.thumb_label.setText(UIStrings.FALLBACK_THUMB_FILE)
 
         except Exception:
+            logger.warning("Onizleme yuklenemedi: %s", self.file_path, exc_info=True)
             self.thumb_label.setText(UIStrings.FALLBACK_THUMB_UNKNOWN)
 
     def format_size(self, size):

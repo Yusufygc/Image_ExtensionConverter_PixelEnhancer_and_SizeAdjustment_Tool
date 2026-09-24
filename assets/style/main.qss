@@ -191,6 +191,21 @@ QLabel#DropZoneText {
     font-weight: bold;
 }
 
+/* Fallback emoji icon shown when the themed upload SVG icon can't be loaded */
+QLabel#DropZoneIconFallback {
+    font-size: 48px;
+}
+
+/* Toast notification bubble */
+QLabel#ToastLabel {
+    color: white;
+    background-color: rgba(40, 40, 40, 230);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 /* Header Title */
 QLabel#TitleLabel {
     font-size: 24px;

@@ -24,10 +24,13 @@ class DropZone(QFrame):
     def update_icon(self):
         icon = ThemeManager.get_themed_icon(AppIcons.UPLOAD, "accent")
         if not icon.isNull():
+            self.icon_label.setObjectName("")
             self.icon_label.setPixmap(icon.pixmap(64, 64))
         else:
-            self.icon_label.setText("📂")
-            self.icon_label.setStyleSheet("font-size: 48px;")
+            self.icon_label.setObjectName("DropZoneIconFallback")
+            self.icon_label.setText(UIStrings.FALLBACK_FOLDER)
+            self.style().unpolish(self.icon_label)
+            self.style().polish(self.icon_label)
 
     def setup_ui(self):
         layout = QVBoxLayout(self)

@@ -132,7 +132,7 @@ class MainWindow(QMainWindow):
         step1_layout.setContentsMargins(0, 0, 0, 0)
         step1_layout.addWidget(self._build_file_selection_group(), stretch=1)
 
-        self.btn_next_step = QPushButton("İleri ->")
+        self.btn_next_step = QPushButton(UIStrings.BTN_NEXT_STEP)
         self.btn_next_step.setObjectName("PrimaryButton")
         self.btn_next_step.setMinimumHeight(40)
         self.btn_next_step.setCursor(Qt.PointingHandCursor)
@@ -227,7 +227,7 @@ class MainWindow(QMainWindow):
 
         btn_layout = QHBoxLayout()
         
-        self.btn_prev_step = QPushButton("<- Geri")
+        self.btn_prev_step = QPushButton(UIStrings.BTN_PREV_STEP)
         self.btn_prev_step.setMinimumHeight(50)
         self.btn_prev_step.setCursor(Qt.PointingHandCursor)
         self.btn_prev_step.clicked.connect(self.go_to_step_1)
@@ -403,11 +403,6 @@ class MainWindow(QMainWindow):
         progress_layout.addWidget(self.progress_bar)
         return progress_layout
 
-    def set_app_instance(self, app):
-        self.app_instance = app
-        self.app_instance = app
-        ThemeManager.apply_theme(app)
-
     @Slot()
     def toggle_theme(self):
         ThemeManager.toggle_theme(self.app_instance)
@@ -494,7 +489,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def go_to_step_2(self):
         if not self.selected_files:
-            ToastNotification.show_message(self, "Lütfen önce dönüştürülecek dosyaları ekleyin.")
+            ToastNotification.show_message(self, UIStrings.TOAST_NO_FILES_SELECTED)
             return
         self.stepper_stack.setCurrentIndex(1)
 
@@ -519,7 +514,7 @@ class MainWindow(QMainWindow):
 
                 # Add Item to List Widget using Custom Widget
                 item = QListWidgetItem(self.file_list)
-                item.setSizeHint(QSize(0, 68)) # Set height for the item (48px thumbnail + padding)
+                item.setSizeHint(QSize(0, AppConstants.FILE_ITEM_ROW_HEIGHT))
 
                 item_widget = FileListItemWidget(path)
                 item_widget.remove_clicked.connect(self.remove_file)

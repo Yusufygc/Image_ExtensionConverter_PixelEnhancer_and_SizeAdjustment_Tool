@@ -1,7 +1,5 @@
-import sys
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGraphicsOpacityEffect
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QColor
 
 class ToastNotification(QWidget):
     def __init__(self, parent, message, duration=2500):
@@ -18,17 +16,8 @@ class ToastNotification(QWidget):
         layout.setContentsMargins(15, 10, 15, 10)
         
         self.label = QLabel(message)
+        self.label.setObjectName("ToastLabel")
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet("""
-            QLabel {
-                color: white;
-                background-color: rgba(40, 40, 40, 230);
-                border-radius: 8px;
-                padding: 10px 20px;
-                font-size: 14px;
-                font-weight: 500;
-            }
-        """)
         layout.addWidget(self.label)
         
         self.opacity_effect = QGraphicsOpacityEffect(self)
